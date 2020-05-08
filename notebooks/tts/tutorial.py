@@ -219,7 +219,7 @@ class MyRNN(nn.Module):
 num_hidden_layers = 3
 hidden_size = 512
 
-batch_size = 32
+batch_size = 4
 
 n_workers = 2
 pin_memory = True
@@ -326,6 +326,7 @@ loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
 
 # In[40]:
 
+torch.save(models['duration'].state_dict(), './model_duration')
 
 plt.plot(loss_history["train"], linewidth=2, label="Train loss")
 plt.plot(loss_history["test"], linewidth=2, label="Test loss")
@@ -341,6 +342,8 @@ ty = "acoustic"
 optimizer = optim.Adam(models[ty].parameters(), lr=lr, weight_decay=weight_decay)
 loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
                      X_min[ty], X_max[ty], Y_mean[ty], Y_scale[ty], utt_lengths[ty])
+
+torch.save(models['acoustic'].state_dict(), './model_acoustic')
 
 
 # In[ ]:
