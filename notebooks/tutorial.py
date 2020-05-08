@@ -3,7 +3,6 @@ from os.path import expanduser, join
 
 
 
-rcParams["figure.figsize"] = (16,5)
 
 from nnmnkwii.datasets import FileDataSource, FileSourceDataset
 from nnmnkwii.datasets import PaddedFileSourceDataset, MemoryCacheDataset#これはなに？
