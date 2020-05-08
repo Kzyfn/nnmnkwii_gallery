@@ -2,7 +2,7 @@
 from os.path import expanduser, join
 
 
-
+import matplotlib.pyplot as plt
 
 from nnmnkwii.datasets import FileDataSource, FileSourceDataset
 from nnmnkwii.datasets import PaddedFileSourceDataset, MemoryCacheDataset#これはなに？
