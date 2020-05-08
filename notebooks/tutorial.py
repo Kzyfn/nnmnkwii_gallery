@@ -73,7 +73,7 @@ class BinaryFileSource(FileDataSource):
         self.train = train
     def collect_files(self):
         files = sorted(glob(join(self.data_root, "*.bin")))
-        files = files[:len(files)-5][:10] # last 5 is real testset
+        files = files[:len(files)-5]#[:10] # last 5 is real testset
         train_files, test_files = train_test_split(files, test_size=test_size,
                                                    random_state=random_state)
         if self.train:
@@ -327,8 +327,8 @@ loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
 # In[40]:
 
 
-plot(loss_history["train"], linewidth=2, label="Train loss")
-plot(loss_history["test"], linewidth=2, label="Test loss")
+plt.plot(loss_history["train"], linewidth=2, label="Train loss")
+plt.plot(loss_history["test"], linewidth=2, label="Test loss")
 legend(prop={"size": 16})
 
 
@@ -346,8 +346,8 @@ loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
 # In[ ]:
 
 
-plot(loss_history["train"], linewidth=2, label="Train loss")
-plot(loss_history["test"], linewidth=2, label="Test loss")
+plt.plot(loss_history["train"], linewidth=2, label="Train loss")
+plt.plot(loss_history["test"], linewidth=2, label="Test loss")
 legend(prop={"size": 16})
 
 
