@@ -1,17 +1,8 @@
 
 from os.path import expanduser, join
-# 以下を、ダウンロードしたデモのディレクリを指すように、修正してください。
 
 
 
-# In[4]:
-
-
-
-# In[5]:
-
-
-get_ipython().run_line_magic('pylab', 'inline')
 rcParams["figure.figsize"] = (16,5)
 
 from nnmnkwii.datasets import FileDataSource, FileSourceDataset
@@ -35,11 +26,6 @@ import librosa
 import librosa.display
 
 
-# ## Data
-# 
-# In this demo we construct datasets from pre-computed linguistic/duration/acoustic features because computing features from wav/label files on-demand are peformance heavy, particulary for acoustic features. See the following python script if you are interested in how we extract features.
-
-# In[6]:
 
 
 DATA_ROOT = "./data/basic5000"#NIT-ATR503/"
