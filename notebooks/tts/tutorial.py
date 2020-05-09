@@ -320,7 +320,7 @@ for typ in ["duration", "acoustic"]:
 
 ty = "duration"
 optimizer = optim.Adam(models[ty].parameters(), lr=lr, weight_decay=weight_decay)
-loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
+loss_history_1 = train_rnn(models[ty], optimizer, X[ty], Y[ty],
                      X_min[ty], X_max[ty], Y_mean[ty], Y_scale[ty], utt_lengths[ty])
 
 
@@ -328,9 +328,10 @@ loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
 
 torch.save(models['duration'].state_dict(), './model_duration')
 
-plt.plot(loss_history["train"], linewidth=2, label="Train loss")
-plt.plot(loss_history["test"], linewidth=2, label="Test loss")
-legend(prop={"size": 16})
+
+
+
+
 
 
 # ### Training acoustic model
@@ -346,12 +347,19 @@ loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
 torch.save(models['acoustic'].state_dict(), './model_acoustic')
 
 
+
+
 # In[ ]:
+plt.figure()
+plt.plot(loss_history_1["train"], linewidth=2, label="Train loss")
+plt.plot(loss_history_1["test"], linewidth=2, label="Test loss")
+plt.savefig('duration_loss.png')
 
-
+plt.figure()
 plt.plot(loss_history["train"], linewidth=2, label="Train loss")
 plt.plot(loss_history["test"], linewidth=2, label="Test loss")
-legend(prop={"size": 16})
+
+plt.savefig('duration_loss.png')
 
 
 # ## Test
