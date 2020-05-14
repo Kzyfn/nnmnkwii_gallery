@@ -223,7 +223,7 @@ batch_size = 4
 
 n_workers = 2
 pin_memory = True
-nepoch = 10
+nepoch = 30
 lr = 0.002
 weight_decay = 1e-6
 use_cuda = torch.cuda.is_available()
