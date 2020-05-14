@@ -1,6 +1,6 @@
 import numpy as np
 from nnmnkwii.io import hts
-
+from os.path import join
 from glob import glob
 
 paths = sorted(glob(join('../data/basic5000', "label_phone_align", "*.lab")))
