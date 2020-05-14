@@ -174,6 +174,8 @@ class PyTorchDataset(torch.utils.data.Dataset):
         x = minmax_scale(x, self.X_min, self.X_max, feature_range=(0.01, 0.99))
         y = scale(y, self.Y_mean, self.Y_scale)
         l = torch.from_numpy(self.lengths[idx])
+        x[286:336] = 0
+        x[489:] = 0
         x, y = torch.from_numpy(x), torch.from_numpy(y)
         return x, y, l
     def __len__(self):
@@ -326,7 +328,7 @@ loss_history_1 = train_rnn(models[ty], optimizer, X[ty], Y[ty],
 
 # In[40]:
 
-torch.save(models['duration'].state_dict(), './model_duration')
+torch.save(models['duration'].state_dict(), './model_durationc')
 
 
 
@@ -344,7 +346,7 @@ optimizer = optim.Adam(models[ty].parameters(), lr=lr, weight_decay=weight_decay
 loss_history = train_rnn(models[ty], optimizer, X[ty], Y[ty],
                      X_min[ty], X_max[ty], Y_mean[ty], Y_scale[ty], utt_lengths[ty])
 
-torch.save(models['acoustic'].state_dict(), './model_acoustic')
+torch.save(models['acoustic'].state_dict(), './model_acoustic_no_accent')
 
 
 
