@@ -174,6 +174,8 @@ class PyTorchDataset(torch.utils.data.Dataset):
         x = minmax_scale(x, self.X_min, self.X_max, feature_range=(0.01, 0.99))
         y = scale(y, self.Y_mean, self.Y_scale)
         l = torch.from_numpy(self.lengths[idx])
+        x[286:336] = 0
+        x[489:] = 0
         x, y = torch.from_numpy(x), torch.from_numpy(y)
         return x, y, l
     def __len__(self):
@@ -239,8 +241,6 @@ def train_rnn(model, optimizer, X, Y, X_min, X_max, Y_mean, Y_scale,
         
     X_train, X_test = X["train"], X["test"]
     Y_train, Y_test = Y["train"], Y["test"]
-    X_train[:, 286:336, :] = 0
-    X_test[:, 286:336, :] = 0
     train_lengths, test_lengths = utt_lengths["train"], utt_lengths["test"]
     
     # Sequence-wise train loader
