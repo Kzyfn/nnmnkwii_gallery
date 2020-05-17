@@ -290,7 +290,6 @@ for i in range(90):
     print(train_mora_index_lists[i].shape[0] / X['acoustic']['train'][i].shape[0])
 
 
-
 print(X['acoustic']['train'][i].shape)
 
 device='cuda'
