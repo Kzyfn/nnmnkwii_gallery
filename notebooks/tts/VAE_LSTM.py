@@ -92,8 +92,8 @@ class BinaryFileSource(FileDataSource):
         return np.fromfile(path, dtype=np.float32).reshape(-1, self.dim)
 
 
-X = {{}, "acoustic": {}}
-Y = {{}, "acoustic": {}}
+X = {"acoustic": {}}
+Y = {"acoustic": {}}
 utt_lengths = {"duration":{}, "acoustic": {}}
 for ty in ["acoustic"]:
     for phase in ["train", "test"]:
