@@ -268,7 +268,7 @@ import pandas as pd
 # In[259]:
 
 
-mora_index_lists = sorted(glob(join('data/NIT-ATR503/mora_index', "*.csv")))[:100]
+mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))[:100]
 mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
 
 mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
@@ -289,7 +289,7 @@ for i in range(90):
 
 
 
-
+print(X['acoustic']['train'][i].shape)
 
 device='cuda'
 model = VAE().to(device)
