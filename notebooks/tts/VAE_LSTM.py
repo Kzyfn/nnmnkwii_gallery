@@ -117,14 +117,14 @@ for ty in ["acoustic"]:
         train = phase == "train"
         x_dim = duration_linguistic_dim if ty == "duration" else acoustic_linguisic_dim
         y_dim = duration_dim if ty == "duration" else acoustic_dim
-        X[ty][phase] = PaddedFileSourceDataset(BinaryFileSource(join(DATA_ROOT, "X_{}".format(ty)),
+        X[ty][phase] = FileSourceDataset(BinaryFileSource(join(DATA_ROOT, "X_{}".format(ty)),
                                                        dim=x_dim,
                                                        train=train), 
-                                               np.max(utt_lengths[ty][phase]))
-        Y[ty][phase] = PaddedFileSourceDataset(BinaryFileSource(join(DATA_ROOT, "Y_{}".format(ty)),
+                                               )#np.max(utt_lengths[ty][phase]))
+        Y[ty][phase] = FileSourceDataset(BinaryFileSource(join(DATA_ROOT, "Y_{}".format(ty)),
                                                        dim=y_dim,
                                                        train=train), 
-                                               np.max(utt_lengths[ty][phase]))
+                                              )# np.max(utt_lengths[ty][phase]))
 
 
 
@@ -268,7 +268,7 @@ import pandas as pd
 # In[259]:
 
 
-mora_index_lists = sorted(glob(join('data/NIT-ATR503/mora_index', "*.csv")))[:100]
+mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))
 mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
 
 mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
@@ -276,7 +276,7 @@ mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path i
 
 
 train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_lists_for_model, test_size=test_size,
-                                                  random_state=random_state)
+                                                 random_state=random_state)
 
 
 
@@ -285,11 +285,13 @@ train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_list
 
 
 for i in range(90):
-    print(np.array(pd.read_csv(mora_index_lists[i])).reshape(-1).shape[0] / X['acoustic']['train'][i].shape[0])
+    print(train_mora_index_lists[i].shape[0])
+    print(X['acoustic']['train'][i].shape[0])
+    print(train_mora_index_lists[i].shape[0] / X['acoustic']['train'][i].shape[0])
 
 
 
-
+print(X['acoustic']['train'][i].shape)
 
 device='cuda'
 model = VAE().to(device)

@@ -21,5 +21,4 @@ for i, filepath in tqdm(enumerate(paths)):
     indices = label.silence_frame_indices().astype(int)
     mora_index = np.delete(mora_index, indices, axis=0)
 
-
-    np.savetxt('../data/basic5000/mora_index/mora_index_'+ '0'*(3-len(str(i+1))) + str(i+1) + '.csv', mora_index)
+    np.savetxt('../data/basic5000/mora_index/mora_index_' + '0'*(4-len(str(i+1))) + str(i+1) + '.csv', mora_index)
