@@ -94,7 +94,7 @@ class BinaryFileSource(FileDataSource):
 
 X = {"acoustic": {}}
 Y = {"acoustic": {}}
-utt_lengths = {"duration":{}, "acoustic": {}}
+utt_lengths = { "acoustic": {}}
 for ty in ["acoustic"]:
     for phase in ["train", "test"]:
         train = phase == "train"
@@ -128,9 +128,6 @@ for ty in ["acoustic"]:
 
 
 
-print("Total number of utterances:", len(utt_lengths["duration"]["train"]))
-print("Total number of frames:", np.sum(utt_lengths["duration"]["train"]))
-
 
 
 print("Total number of utterances:", len(utt_lengths["acoustic"]["train"]))
@@ -145,7 +142,7 @@ Y_mean = {}
 Y_var = {}
 Y_scale = {}
 
-for typ in ["acoustic", "duration"]:
+for typ in ["acoustic"]:
     X_min[typ], X_max[typ] = minmax(X[typ]["train"], utt_lengths[typ]["train"])
     Y_mean[typ], Y_var[typ] = meanvar(Y[typ]["train"], utt_lengths[typ]["train"])
     Y_scale[typ] = np.sqrt(Y_var[typ])
