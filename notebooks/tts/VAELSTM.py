@@ -390,7 +390,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 20
+num_epochs = 12
 
 for epoch in range(1, num_epochs + 1):
     loss = train(epoch)
