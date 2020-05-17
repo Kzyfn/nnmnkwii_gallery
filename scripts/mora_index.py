@@ -20,4 +20,4 @@ for i, filepath in enumerate(paths):
     mora_index = np.delete(mora_index, indices, axis=0)
 
 
-    np.savetxt('../data/basic5000/mora_index/mora_index_' + + str(i) + '.csv')
+    np.savetxt('../data/basic5000/mora_index/mora_index_' + '0'*(4-len(str(i+1))) + str(i+1) + '.csv')
