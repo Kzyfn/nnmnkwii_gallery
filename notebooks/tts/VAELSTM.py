@@ -341,14 +341,14 @@ def train(epoch):
         loss.backward()
         train_loss += loss.item()
         optimizer.step()
-        for j in range(3):
-            data[j] = data[j].to('cpu')
         #del train_loader[batch_idx]
         if batch_idx % 4945 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx, train_num,
                 100. * batch_idx / train_num,
                 loss.item() / len(data)))
+
+        torch.cuda.empty_cache()
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(
           epoch, train_loss / 1))
