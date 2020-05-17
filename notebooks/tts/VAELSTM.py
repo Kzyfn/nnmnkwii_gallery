@@ -220,7 +220,7 @@ class VAE(nn.Module):
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
         out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
-        out = out[torch.where(mora_index>0)]
+        out = out[torch.where(mora_index>0, 1, 0)]
         
         h1 = F.relu(out)
 
@@ -278,20 +278,20 @@ mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path i
 train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_lists_for_model, test_size=test_size,
                                                  random_state=random_state)
 
-print(len(train_mora_index_lists))
+#print(len(train_mora_index_lists))
 
-print(len(X['acoustic']['train']))
+#print(len(X['acoustic']['train']))
 
 
-
+"""
 for i in range(90):
     print(train_mora_index_lists[i].shape[0])
     print(X['acoustic']['train'][i].shape[0])
     print(train_mora_index_lists[i].shape[0] / X['acoustic']['train'][i].shape[0])
+"""
 
 
-
-print(X['acoustic']['train'][i].shape)
+#print(X['acoustic']['train'][i].shape)
 
 device='cuda'
 model = VAE().to(device)
