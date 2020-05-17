@@ -363,10 +363,11 @@ def test(epoch):
     test_loss = 0
     with torch.no_grad():
         for i, data, in enumerate(test_loader):
+            tmp = []
             for j in range(3):
-                data[j] = data[j].to(device)
-            recon_batch, mu, logvar = model(data[0], data[1], data[2])
-            test_loss += loss_function(recon_batch, data[1], mu, logvar).item()
+                tmp.append(torch.tensor(data[j]).to(device))
+            recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
+            test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
             """
             if i == 0:
                 n = min(data.size(0), 8)
@@ -375,6 +376,7 @@ def test(epoch):
                 save_image(comparison.cpu(),
                          'results/reconstruction_' + str(epoch) + '.png', nrow=n)
             """
+            del tmp
 
     test_loss /= 1
     print('====> Test set loss: {:.4f}'.format(test_loss))
