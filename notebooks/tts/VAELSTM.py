@@ -220,7 +220,7 @@ class VAE(nn.Module):
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
         out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
-        out = out[torch.nonzero(mora_index>0,as_tuple=True)]
+        out = out[np.where(mora_index.numpy()>0)]
         
         h1 = F.relu(out)
 
