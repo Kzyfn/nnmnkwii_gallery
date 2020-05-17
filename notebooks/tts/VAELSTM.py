@@ -333,14 +333,16 @@ def train(epoch):
     model.train()
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
+        tmp = []
         for j in range(3):
-            data[j] = torch.from_numpy(data[j]).to(device)
+            tmp.append(torch.from_numpy(data[j]).to(device))
         optimizer.zero_grad()
-        recon_batch, mu, logvar = model(data[0], data[1], data[2])
-        loss = loss_function(recon_batch, data[1], mu, logvar)
+        recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
+        loss = loss_function(recon_batch, tmp[1], mu, logvar)
         loss.backward()
         train_loss += loss.item()
         optimizer.step()
+        del tmp
         #del train_loader[batch_idx]
         if batch_idx % 4945 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
