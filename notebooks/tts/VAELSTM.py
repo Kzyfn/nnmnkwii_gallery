@@ -234,7 +234,7 @@ class VAE(nn.Module):
 
     def decode(self, z, linguistic_features, mora_index):
         
-        z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32)
+        z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32).to('cuda')
         count = 0
         for mora_i in mora_index:
             if mora_i == 1:
