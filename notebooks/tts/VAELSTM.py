@@ -222,6 +222,7 @@ class VAE(nn.Module):
         out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
         nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
         out = out[nonzero_indices]
+        del nonzero_indices
         
         h1 = F.relu(out)
 
@@ -338,9 +339,10 @@ def train(epoch):
         loss.backward()
         train_loss += loss.item()
         optimizer.step()
-        if batch_idx % 5 == 0:
+        del train_loader[batch_idx]
+        if batch_idx % 4945 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader),
+                epoch, batch_idx, len(train_loader),
                 100. * batch_idx / len(train_loader),
                 loss.item() / len(data)))
 
