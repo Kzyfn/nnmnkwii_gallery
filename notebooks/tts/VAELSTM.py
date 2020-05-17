@@ -315,15 +315,15 @@ def loss_function(recon_x, x, mu, logvar):
 
 func_tensor = np.vectorize(torch.from_numpy)
 
-X_acoustic_train = [torch.from_numpy(X['acoustic']['train'][i]) for i in range(len(X['acoustic']['train']))] 
-Y_acoustic_train = [torch.from_numpy(Y['acoustic']['train'][i]) for i in range(len(Y['acoustic']['train']))]
-train_mora_index_lists = [torch.tensor(train_mora_index_lists[i]) for i in range(len(train_mora_index_lists))]
+X_acoustic_train = [X['acoustic']['train'][i] for i in range(len(X['acoustic']['train']))] 
+Y_acoustic_train = [Y['acoustic']['train'][i] for i in range(len(Y['acoustic']['train']))]
+train_mora_index_lists = [train_mora_index_lists[i] for i in range(len(train_mora_index_lists))]
 
 train_num = len(X_acoustic_train)
 
-X_acoustic_test = [torch.from_numpy(X['acoustic']['test'][i]) for i in range(len(X['acoustic']['test']))]
-Y_acoustic_test = [torch.from_numpy(Y['acoustic']['test'][i]) for i in range(len(Y['acoustic']['test']))]
-test_mora_index_lists = [torch.tensor(test_mora_index_lists[i]) for i in range(len(test_mora_index_lists))]
+X_acoustic_test = [X['acoustic']['test'][i] for i in range(len(X['acoustic']['test']))]
+Y_acoustic_test = [Y['acoustic']['test'][i] for i in range(len(Y['acoustic']['test']))]
+test_mora_index_lists = [test_mora_index_lists[i] for i in range(len(test_mora_index_lists))]
 
 train_loader = [[X_acoustic_train[i], Y_acoustic_train[i], train_mora_index_lists[i]] for i in range(len(train_mora_index_lists))]
 test_loader = [[X_acoustic_test[i], Y_acoustic_test[i], test_mora_index_lists[i]] for i in range(len(test_mora_index_lists))]
@@ -334,7 +334,7 @@ def train(epoch):
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
         for j in range(3):
-            data[j] = data[j].to(device)
+            data[j] = torch.from_numpy(data[j]).to(device)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data[0], data[1], data[2])
         loss = loss_function(recon_batch, data[1], mu, logvar)
@@ -348,7 +348,7 @@ def train(epoch):
                 100. * batch_idx / train_num,
                 loss.item() / len(data)))
 
-        torch.cuda.empty_cache()
+        #torch.cuda.empty_cache()
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(
           epoch, train_loss / 1))
