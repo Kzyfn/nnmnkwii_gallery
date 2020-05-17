@@ -316,11 +316,11 @@ func_tensor = np.vectorize(torch.from_numpy)
 
 X_acoustic_train = [torch.from_numpy(X['acoustic']['train'][i]) for i in range(len(X['acoustic']['train']))] 
 Y_acoustic_train = [torch.from_numpy(Y['acoustic']['train'][i]) for i in range(len(Y['acoustic']['train']))]
-#train_mora_index_lists = [torch.tensor(train_mora_index_lists[i]) for i in range(len(train_mora_index_lists))]
+train_mora_index_lists = [torch.tensor(train_mora_index_lists[i]) for i in range(len(train_mora_index_lists))]
 
 X_acoustic_test = [torch.from_numpy(X['acoustic']['test'][i]) for i in range(len(X['acoustic']['test']))]
 Y_acoustic_test = [torch.from_numpy(Y['acoustic']['test'][i]) for i in range(len(Y['acoustic']['test']))]
-#test_mora_index_lists = [torch.tensor(test_mora_index_lists[i]) for i in range(len(test_mora_index_lists))]
+test_mora_index_lists = [torch.tensor(test_mora_index_lists[i]) for i in range(len(test_mora_index_lists))]
 
 train_loader = [[X_acoustic_train[i], Y_acoustic_train[i], train_mora_index_lists[i]] for i in range(len(train_mora_index_lists))]
 test_loader = [[X_acoustic_test[i], Y_acoustic_test[i], test_mora_index_lists[i]] for i in range(len(test_mora_index_lists))]
