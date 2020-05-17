@@ -270,7 +270,7 @@ import pandas as pd
 
 mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))
 mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
-
+print(len(mora_index_lists))
 mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
 
 
@@ -278,9 +278,9 @@ mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path i
 train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_lists_for_model, test_size=test_size,
                                                  random_state=random_state)
 
+print(len(train_mora_index_lists))
 
-
-
+print(len(X['acoustic']['train']))
 
 
 
