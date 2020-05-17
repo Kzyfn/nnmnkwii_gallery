@@ -319,6 +319,8 @@ X_acoustic_train = [torch.from_numpy(X['acoustic']['train'][i]) for i in range(l
 Y_acoustic_train = [torch.from_numpy(Y['acoustic']['train'][i]) for i in range(len(Y['acoustic']['train']))]
 train_mora_index_lists = [torch.tensor(train_mora_index_lists[i]) for i in range(len(train_mora_index_lists))]
 
+train_num = len(X_acoustic_train)
+
 X_acoustic_test = [torch.from_numpy(X['acoustic']['test'][i]) for i in range(len(X['acoustic']['test']))]
 Y_acoustic_test = [torch.from_numpy(Y['acoustic']['test'][i]) for i in range(len(Y['acoustic']['test']))]
 test_mora_index_lists = [torch.tensor(test_mora_index_lists[i]) for i in range(len(test_mora_index_lists))]
@@ -342,8 +344,8 @@ def train(epoch):
         del train_loader[batch_idx]
         if batch_idx % 4945 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx, len(train_loader),
-                100. * batch_idx / len(train_loader),
+                epoch, batch_idx, train_num,
+                100. * batch_idx / train_num,
                 loss.item() / len(data)))
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(
@@ -382,7 +384,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 5
+num_epochs = 20
 
 for epoch in range(1, num_epochs + 1):
     loss = train(epoch)
