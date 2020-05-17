@@ -220,7 +220,8 @@ class VAE(nn.Module):
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
         out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
-        out = out[np.where(mora_index>0)]
+        nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
+        out = out[nonzero_indices]
         
         h1 = F.relu(out)
 
@@ -329,7 +330,7 @@ def train(epoch):
     model.train()
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
-        for j in range(2):
+        for j in range(3):
             data[j] = data[j].to(device)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data[0], data[1], data[2])
@@ -354,7 +355,7 @@ def test(epoch):
     test_loss = 0
     with torch.no_grad():
         for i, data, in enumerate(test_loader):
-            for j in range(2):
+            for j in range(3):
                 data[j] = data[j].to(device)
             recon_batch, mu, logvar = model(data[0], data[1], data[2])
             test_loss += loss_function(recon_batch, data[1], mu, logvar).item()
