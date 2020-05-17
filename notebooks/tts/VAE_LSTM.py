@@ -92,10 +92,10 @@ class BinaryFileSource(FileDataSource):
         return np.fromfile(path, dtype=np.float32).reshape(-1, self.dim)
 
 
-X = {"duration":{}, "acoustic": {}}
-Y = {"duration":{}, "acoustic": {}}
+X = {{}, "acoustic": {}}
+Y = {{}, "acoustic": {}}
 utt_lengths = {"duration":{}, "acoustic": {}}
-for ty in ["duration", "acoustic"]:
+for ty in ["acoustic"]:
     for phase in ["train", "test"]:
         train = phase == "train"
         x_dim = duration_linguistic_dim if ty == "duration" else acoustic_linguisic_dim
@@ -112,7 +112,7 @@ for ty in ["duration", "acoustic"]:
 
 
 
-for ty in ["duration", "acoustic"]:
+for ty in ["acoustic"]:
     for phase in ["train", "test"]:
         train = phase == "train"
         x_dim = duration_linguistic_dim if ty == "duration" else acoustic_linguisic_dim
