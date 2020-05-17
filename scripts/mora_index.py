@@ -2,10 +2,12 @@ import numpy as np
 from nnmnkwii.io import hts
 from os.path import join
 from glob import glob
+from tqdm import tqdm
+
 
 paths = sorted(glob(join('../data/basic5000', "label_phone_align", "*.lab")))
 
-for i, filepath in enumerate(paths):
+for i, filepath in tqdm(enumerate(paths)):
     label = hts.load(filepath)
 
 
@@ -20,4 +22,4 @@ for i, filepath in enumerate(paths):
     mora_index = np.delete(mora_index, indices, axis=0)
 
 
-    np.savetxt('../data/basic5000/mora_index/mora_index_' + + str(i) + '.csv')
+    np.savetxt('../data/basic5000/mora_index/mora_index_'+ '0'*(3-len(str(i+1))) + str(i+1) + '.csv', mora_index)
