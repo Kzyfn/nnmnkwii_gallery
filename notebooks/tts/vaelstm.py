@@ -10,6 +10,7 @@ print(sys.path)
 sys.path.append('/usr/local/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
 sys.path.append('/Users/kazuya_yufune/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
 
+import time
 
 from nnmnkwii.datasets import FileDataSource, FileSourceDataset
 from nnmnkwii.datasets import PaddedFileSourceDataset, MemoryCacheDataset#これはなに？
@@ -194,9 +195,6 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 from tqdm import tnrange, tqdm
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
 from torch import optim
 import torch.nn.functional as F
 
@@ -299,6 +297,7 @@ device='cuda'
 model = VAE().to(device)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
+start = time.time()
 
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
@@ -407,6 +406,8 @@ for epoch in range(1, num_epochs + 1):
     # logging
     loss_list.append(loss)
     test_loss_list.append(test_loss)
+    
+    print(time.time() - start)
 
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
