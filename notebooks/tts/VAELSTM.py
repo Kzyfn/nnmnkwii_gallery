@@ -248,7 +248,7 @@ class VAE(nn.Module):
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
         
-        return torch.sigmoid(self.fc3(h3))
+        return F.relu(self.fc3(h3))#ここ多分sigmoidいらない#torch.sigmoid(self.fc3(h3))
 
     def forward(self, linguistic_features, acoustic_features, mora_index):
         mu, logvar = self.encode(linguistic_features, acoustic_features, mora_index)
