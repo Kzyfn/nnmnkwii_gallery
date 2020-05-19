@@ -366,7 +366,7 @@ def train(epoch):
     print('====> Epoch: {} Average loss: {:.4f}'.format(
           epoch, train_loss / len(train_loader)))
     
-    return train_loss
+    return train_loss / len(train_loader)
 
 
 def test(epoch):
