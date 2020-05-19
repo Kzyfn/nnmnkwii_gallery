@@ -415,7 +415,7 @@ loss_list = []
 test_loss_list = []
 num_epochs = 50
 
-model.load_state_dict(torch.load('vae.pth'))
+#model.load_state_dict(torch.load('vae.pth'))
 
 for epoch in range(1, num_epochs + 1):
     loss = train(epoch)
