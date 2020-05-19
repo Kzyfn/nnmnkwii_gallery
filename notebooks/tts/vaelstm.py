@@ -352,7 +352,7 @@ def train(epoch):
         #torch.cuda.empty_cache()
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(
-          epoch, train_loss / 1))
+          epoch, train_loss / len(train_loader)))
     
     return train_loss
 
@@ -377,7 +377,7 @@ def test(epoch):
             """
             del tmp
 
-    test_loss /= 1
+    test_loss /= len(test_loader)
     print('====> Test set loss: {:.4f}'.format(test_loss))
     
     return test_loss
