@@ -359,7 +359,7 @@ def train(epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx, train_num,
                 100. * batch_idx / train_num,
-                loss.item() / len(data)))
+                loss.item()))
 
         #torch.cuda.empty_cache()
 
