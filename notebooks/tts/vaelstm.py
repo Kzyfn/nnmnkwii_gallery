@@ -337,7 +337,7 @@ def train(epoch):
         y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
         
         tmp.append(torch.from_numpy(x).to(device))
-        tmp.append(torch.from_numpy(y).to_device))
+        tmp.append(torch.from_numpy(y).to(device))
         tmp.append(torch.from_numpy(data[2]).to(device))
 
         optimizer.zero_grad()
@@ -372,7 +372,7 @@ def test(epoch):
             y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
             
             tmp.append(torch.from_numpy(x).to(device))
-            tmp.append(torch.from_numpy(y).to_device))
+            tmp.append(torch.from_numpy(y).to(device))
             tmp.append(torch.from_numpy(data[2]).to(device))
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
