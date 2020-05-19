@@ -333,8 +333,13 @@ def train(epoch):
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
         tmp = []
-        for j in range(3):
-            tmp.append(torch.from_numpy(data[j]).to(device))
+        x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
+        y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
+        
+        tmp.append(torch.from_numpy(x).to(device))
+        tmp.append(torch.from_numpy(y).to_device))
+        tmp.append(torch.from_numpy(data[2]).to(device))
+
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
         loss = loss_function(recon_batch, tmp[1], mu, logvar)
@@ -363,8 +368,13 @@ def test(epoch):
     with torch.no_grad():
         for i, data, in enumerate(test_loader):
             tmp = []
-            for j in range(3):
-                tmp.append(torch.tensor(data[j]).to(device))
+            x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
+            y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
+            
+            tmp.append(torch.from_numpy(x).to(device))
+            tmp.append(torch.from_numpy(y).to_device))
+            tmp.append(torch.from_numpy(data[2]).to(device))
+
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
             test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
             """
