@@ -333,6 +333,12 @@ def train(epoch):
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
         tmp = []
+
+        """
+        for i in range(3):
+            tmp.append(torch.from_numpy(data[i]).to(device))
+        """
+
         x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
         y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
         
@@ -368,6 +374,12 @@ def test(epoch):
     with torch.no_grad():
         for i, data, in enumerate(test_loader):
             tmp = []
+
+            """
+            for i in range(3):
+                tmp.append(torch.from_numpy(data[i]).to(device))
+            """
+
             x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
             y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
             
