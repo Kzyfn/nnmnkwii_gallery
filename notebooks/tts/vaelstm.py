@@ -295,7 +295,7 @@ for i in range(90):
 
 device='cuda'
 model = VAE().to(device)
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=1e-2)#1e-3
 
 start = time.time()
 
@@ -334,9 +334,9 @@ def train(epoch):
     for batch_idx, data in enumerate(train_loader):
         tmp = []
 
-        """
-        for i in range(3):
-            tmp.append(torch.from_numpy(data[i]).to(device))
+        
+        for j in range(3):
+            tmp.append(torch.from_numpy(data[j]).to(device))
         """
 
         x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
@@ -345,6 +345,7 @@ def train(epoch):
         tmp.append(torch.from_numpy(x).to(device))
         tmp.append(torch.from_numpy(y).to(device))
         tmp.append(torch.from_numpy(data[2]).to(device))
+        """
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
@@ -375,9 +376,9 @@ def test(epoch):
         for i, data, in enumerate(test_loader):
             tmp = []
 
-            """
-            for i in range(3):
-                tmp.append(torch.from_numpy(data[i]).to(device))
+     
+            for j in range(3):
+                tmp.append(torch.tensor(data[j]).to(device))
             """
 
             x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
@@ -386,6 +387,7 @@ def test(epoch):
             tmp.append(torch.from_numpy(x).to(device))
             tmp.append(torch.from_numpy(y).to(device))
             tmp.append(torch.from_numpy(data[2]).to(device))
+            """
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
             test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
@@ -413,6 +415,8 @@ loss_list = []
 test_loss_list = []
 num_epochs = 50
 
+model.load_state_dict(torch.load('vae.pth'))
+
 for epoch in range(1, num_epochs + 1):
     loss = train(epoch)
     test_loss = test(epoch)
@@ -434,7 +438,7 @@ for epoch in range(1, num_epochs + 1):
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae.pth')
+torch.save(model.state_dict(), 'vae_mse.pth')
 
 
 # ## Train
