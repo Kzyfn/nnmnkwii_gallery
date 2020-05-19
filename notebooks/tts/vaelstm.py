@@ -246,7 +246,7 @@ class VAE(nn.Module):
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
         
-        return F.relu(self.fc3(h3).view(-1, 1))#torch.sigmoid(self.fc3(h3))
+        return self.fc3(h3).view(-1, 1)#torch.sigmoid(self.fc3(h3))
 
     def forward(self, linguistic_features, acoustic_features, mora_index):
         mu, logvar = self.encode(linguistic_features, acoustic_features, mora_index)
@@ -301,7 +301,7 @@ start = time.time()
 
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
-    BCE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
+    BCE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='mean')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
 
     # see Appendix B from VAE paper:
     # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
@@ -406,7 +406,7 @@ for epoch in range(1, num_epochs + 1):
     # logging
     loss_list.append(loss)
     test_loss_list.append(test_loss)
-    
+
     print(time.time() - start)
 
 # save the training model
