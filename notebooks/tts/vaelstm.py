@@ -315,7 +315,7 @@ def loss_function(recon_x, x, mu, logvar):
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     #print(KLD)
 
-    return MSE + KLD
+    return MSE + 0.1 * KLD
 
 
 func_tensor = np.vectorize(torch.from_numpy)
