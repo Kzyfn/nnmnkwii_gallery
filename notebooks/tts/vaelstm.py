@@ -224,7 +224,7 @@ class VAE(nn.Module):
         
         h1 = F.relu(out)
 
-        return torch.sigmoid(self.fc21(h1)), self.fc22(h1)
+        return self.fc21(h1), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5*logvar)
@@ -246,7 +246,7 @@ class VAE(nn.Module):
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
         
-        return self.fc3(h3).view(-1, 1)#torch.sigmoid(self.fc3(h3))
+        return self.fc3(h3)#torch.sigmoid(self.fc3(h3))
 
     def forward(self, linguistic_features, acoustic_features, mora_index):
         mu, logvar = self.encode(linguistic_features, acoustic_features, mora_index)
