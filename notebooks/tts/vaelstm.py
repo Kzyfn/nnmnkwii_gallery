@@ -302,7 +302,7 @@ start = time.time()
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
     #ここがおかしい
-    BCE = torch.tanh(recon_x.view(-1), x.view(-1, ), reduction='mean')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
+    BCE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='mean')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
     print('LOSS')
     print(BCE)
 
