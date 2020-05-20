@@ -302,7 +302,7 @@ start = time.time()
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
     #ここがおかしい
-    BCE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='mean')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
+    MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='mean')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
     #print('LOSS')
     #print(BCE)
 
@@ -313,7 +313,7 @@ def loss_function(recon_x, x, mu, logvar):
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     #print(KLD)
 
-    return BCE + KLD
+    return MSE# + KLD
 
 
 func_tensor = np.vectorize(torch.from_numpy)
@@ -443,7 +443,7 @@ for epoch in range(1, num_epochs + 1):
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_mse.pth')
+torch.save(model.state_dict(), 'ae_mse.pth')
 
 
 # ## Train
