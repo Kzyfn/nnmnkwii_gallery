@@ -235,9 +235,11 @@ class VAE(nn.Module):
         
         z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32).to('cuda')
         count = 0
+        prev_index = 0
         for mora_i in mora_index:
             if mora_i == 1:
-                z_tmp[int(mora_i)] = z[count]
+                z_tmp[prev_index:int(mora_i)] = z[count]
+                prev_index = mora_i
                 count += 1
 
         
