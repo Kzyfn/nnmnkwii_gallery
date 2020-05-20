@@ -224,7 +224,7 @@ class VAE(nn.Module):
         
         h1 = F.relu(out)
 
-        return self.fc21(h1), self.fc22(h1)
+        return torch.sigmoid(self.fc21(h1)), torch.sigmoid(self.fc22(h1))
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5*logvar)
@@ -295,7 +295,7 @@ for i in range(90):
 
 device='cuda'
 model = VAE().to(device)
-optimizer = optim.Adam(model.parameters(), lr=5e-2)#1e-3
+optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
 
 start = time.time()
 
@@ -303,15 +303,15 @@ start = time.time()
 def loss_function(recon_x, x, mu, logvar):
     #ここがおかしい
     BCE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='mean')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
-    #print('LOSS')
-    #print(BCE)
+    print('LOSS')
+    print(BCE)
 
     # see Appendix B from VAE paper:
     # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
     # https://arxiv.org/abs/1312.6114
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    #print(KLD)
+    print(KLD)
 
     return BCE + KLD
 
@@ -339,9 +339,10 @@ def train(epoch):
         tmp = []
 
         
-        #for j in range(3):
-        #    tmp.append(torch.from_numpy(data[j]).to(device))
+        for j in range(3):
+            tmp.append(torch.from_numpy(data[j]).to(device))
         
+        """
 
         x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
         y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
@@ -349,7 +350,7 @@ def train(epoch):
         tmp.append(torch.from_numpy(x).to(device))
         tmp.append(torch.from_numpy(y).to(device))
         tmp.append(torch.from_numpy(data[2]).to(device))
-        
+        """
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
@@ -381,17 +382,17 @@ def test(epoch):
             tmp = []
 
      
-            #for j in range(3):
-            #    tmp.append(torch.tensor(data[j]).to(device))
+            for j in range(3):
+                tmp.append(torch.tensor(data[j]).to(device))
 
-
+            """
             x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
             y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
             
             tmp.append(torch.from_numpy(x).to(device))
             tmp.append(torch.from_numpy(y).to(device))
             tmp.append(torch.from_numpy(data[2]).to(device))
-            
+            """
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
             test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
@@ -417,7 +418,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 50
+num_epochs = 20
 
 #model.load_state_dict(torch.load('vae.pth'))
 
