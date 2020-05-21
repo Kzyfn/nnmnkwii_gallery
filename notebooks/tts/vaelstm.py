@@ -145,17 +145,17 @@ class VAE(nn.Module):
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
 
-        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional,  batch_first=True)#入力サイズはここできまる
+        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional)#入力サイズはここできまる
         self.fc21 = nn.Linear(self.num_direction*400, 1)
         self.fc22 = nn.Linear(self.num_direction*400, 1)
         ##ここまでエンコーダ
         
-        self.lstm2 = nn.LSTM(acoustic_linguisic_dim+1, 400, num_layers, bidirectional=bidirectional,  batch_first=True)
+        self.lstm2 = nn.LSTM(acoustic_linguisic_dim+1, 400, num_layers, bidirectional=bidirectional)
         self.fc3 = nn.Linear(self.num_direction*400, acoustic_dim)
 
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
-        out, hc = self.lstm1(x.view(1, x.size()[0], -1))
+        out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
         nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
         out = out[nonzero_indices]
         del nonzero_indices
@@ -183,7 +183,7 @@ class VAE(nn.Module):
                 
 
         
-        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view( 1,linguistic_features.size()[0], -1)
+        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view( linguistic_features.size()[0],1, -1)
         
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
@@ -236,7 +236,7 @@ def loss_function(recon_x, x, mu, logvar):
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     #print(KLD)
 
-    return MSE + 0.01 * KLD
+    return MSE +  KLD
 
 
 func_tensor = np.vectorize(torch.from_numpy)
@@ -262,17 +262,18 @@ def train(epoch):
         tmp = []
 
         
-        #for j in range(3):
-        #    tmp.append(torch.from_numpy(data[j]).to(device))
+        for j in range(3):
+            tmp.append(torch.from_numpy(data[j]).to(device))
         
 
-        
+        """        
         x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
         y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
         
         tmp.append(torch.from_numpy(x).to(device))
         tmp.append(torch.from_numpy(y).to(device))
         tmp.append(torch.from_numpy(data[2]).to(device))
+        """
         
 
         optimizer.zero_grad()
@@ -303,16 +304,17 @@ def test(epoch):
             tmp = []
 
      
-            #for j in range(3):
-            #    tmp.append(torch.tensor(data[j]).to(device))
+            for j in range(3):
+                tmp.append(torch.tensor(data[j]).to(device))
 
-            
+            """
             x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
             y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
             
             tmp.append(torch.from_numpy(x).to(device))
             tmp.append(torch.from_numpy(y).to(device))
             tmp.append(torch.from_numpy(data[2]).to(device))
+            """
             
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
