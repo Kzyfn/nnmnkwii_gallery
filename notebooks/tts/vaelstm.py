@@ -183,7 +183,7 @@ class VAE(nn.Module):
                 
 
         
-        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view(linguistic_features.size()[0], 1, -1)
+        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view( 1,linguistic_features.size()[0], -1)
         
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
@@ -357,4 +357,4 @@ for epoch in range(1, num_epochs + 1):
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum.pth')
+torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst.pth')
