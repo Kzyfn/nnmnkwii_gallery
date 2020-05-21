@@ -237,9 +237,10 @@ class VAE(nn.Module):
         count = 0
         #prev_index = torch.tensor([0])
         for j, mora_i in enumerate(mora_index):
-            #z_tmp[int(mora_i)] = z[count]
-            #count += 1
-            
+            if mora_i == 1:
+                z_tmp[int(mora_i)] = z[count]
+                count += 1
+            """
             if mora_i == 0:
                 #z_tmp[prev_index:int(mora_i)] = z[count]
                 z_tmp[:int(mora_i)] = z[count]
@@ -249,7 +250,7 @@ class VAE(nn.Module):
                 z_tmp[int(mora_index[j-1]):int(mora_i)] = z[count]
                 prev_index = mora_i
                 count += 1
-            
+            """
 
         
         x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view(linguistic_features.size()[0], 1, -1)
