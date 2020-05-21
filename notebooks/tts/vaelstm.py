@@ -306,7 +306,7 @@ start = time.time()
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
     #ここがおかしい
-    MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='mean')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
+    MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
     #print('LOSS')
     #print(BCE)
 
