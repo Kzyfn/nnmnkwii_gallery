@@ -343,10 +343,10 @@ def train(epoch):
         tmp = []
 
         
-        for j in range(3):
-            tmp.append(torch.from_numpy(data[j]).to(device))
+        #for j in range(3):
+        #    tmp.append(torch.from_numpy(data[j]).to(device))
         
-        """
+
 
         x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
         y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
@@ -354,7 +354,7 @@ def train(epoch):
         tmp.append(torch.from_numpy(x).to(device))
         tmp.append(torch.from_numpy(y).to(device))
         tmp.append(torch.from_numpy(data[2]).to(device))
-        """
+
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
@@ -386,17 +386,17 @@ def test(epoch):
             tmp = []
 
      
-            for j in range(3):
-                tmp.append(torch.tensor(data[j]).to(device))
+            #for j in range(3):
+            #    tmp.append(torch.tensor(data[j]).to(device))
 
-            """
+   
             x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
             y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
             
             tmp.append(torch.from_numpy(x).to(device))
             tmp.append(torch.from_numpy(y).to(device))
             tmp.append(torch.from_numpy(data[2]).to(device))
-            """
+  
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
             test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
@@ -447,7 +447,7 @@ for epoch in range(1, num_epochs + 1):
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed.pth')
+torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_input_normalized.pth')
 
 
 # ## Train
