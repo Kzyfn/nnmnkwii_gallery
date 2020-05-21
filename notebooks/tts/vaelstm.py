@@ -242,7 +242,7 @@ class VAE(nn.Module):
                 prev_index = int(mora_i)
                 count += 1
                 
-                """
+                
 
         
         x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view(linguistic_features.size()[0], 1, -1)
@@ -447,7 +447,7 @@ for epoch in range(1, num_epochs + 1):
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_mse_0.1kld______z_asitis.pth')
+torch.save(model.state_dict(), 'vae_mse_0.1kld_z_changed.pth')
 
 
 # ## Train
