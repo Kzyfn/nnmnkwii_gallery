@@ -447,7 +447,7 @@ for epoch in range(1, num_epochs + 1):
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_mse_0.1kld_z_changed.pth')
+torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed.pth')
 
 
 # ## Train
