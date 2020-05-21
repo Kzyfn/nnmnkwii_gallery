@@ -335,6 +335,8 @@ test_mora_index_lists = [test_mora_index_lists[i] for i in range(len(test_mora_i
 train_loader = [[X_acoustic_train[i], Y_acoustic_train[i], train_mora_index_lists[i]] for i in range(len(train_mora_index_lists))]
 test_loader = [[X_acoustic_test[i], Y_acoustic_test[i], test_mora_index_lists[i]] for i in range(len(test_mora_index_lists))]
 
+print('X[min, max] ', X_min['acoustic'], X_max['acoustic'])
+print('Y[mean, scalse] ', Y_mean['acoustic'], Y_scale['acoustic'])
 
 def train(epoch):
     model.train()
@@ -343,18 +345,18 @@ def train(epoch):
         tmp = []
 
         
-        #for j in range(3):
-        #    tmp.append(torch.from_numpy(data[j]).to(device))
+        for j in range(3):
+            tmp.append(torch.from_numpy(data[j]).to(device))
         
 
-
+        """
         x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
         y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
         
         tmp.append(torch.from_numpy(x).to(device))
         tmp.append(torch.from_numpy(y).to(device))
         tmp.append(torch.from_numpy(data[2]).to(device))
-
+        """
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
@@ -386,17 +388,17 @@ def test(epoch):
             tmp = []
 
      
-            #for j in range(3):
-            #    tmp.append(torch.tensor(data[j]).to(device))
+            for j in range(3):
+                tmp.append(torch.tensor(data[j]).to(device))
 
-   
+            """
             x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
             y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
             
             tmp.append(torch.from_numpy(x).to(device))
             tmp.append(torch.from_numpy(y).to(device))
             tmp.append(torch.from_numpy(data[2]).to(device))
-  
+            """
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
             test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
@@ -422,7 +424,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 20
+num_epochs = 10
 
 #model.load_state_dict(torch.load('vae.pth'))
 
@@ -447,7 +449,7 @@ for epoch in range(1, num_epochs + 1):
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_input_normalized_losssum.pth')
+torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum.pth')
 
 
 # ## Train
