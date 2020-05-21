@@ -73,7 +73,6 @@ acoustic_subphone_features = "coarse_coding" if use_phone_alignment else "full" 
 
 
 
-
 class BinaryFileSource(FileDataSource):
     def __init__(self, data_root, dim, train):
         self.data_root = data_root
@@ -113,30 +112,6 @@ for ty in ["acoustic"]:
 
 
 
-for ty in ["acoustic"]:
-    for phase in ["train", "test"]:
-        train = phase == "train"
-        x_dim = duration_linguistic_dim if ty == "duration" else acoustic_linguisic_dim
-        y_dim = duration_dim if ty == "duration" else acoustic_dim
-        X[ty][phase] = FileSourceDataset(BinaryFileSource(join(DATA_ROOT, "X_{}".format(ty)),
-                                                       dim=x_dim,
-                                                       train=train), 
-                                               )#np.max(utt_lengths[ty][phase]))
-        Y[ty][phase] = FileSourceDataset(BinaryFileSource(join(DATA_ROOT, "Y_{}".format(ty)),
-                                                       dim=y_dim,
-                                                       train=train), 
-                                              )# np.max(utt_lengths[ty][phase]))
-
-
-
-
-
-print("Total number of utterances:", len(utt_lengths["acoustic"]["train"]))
-print("Total number of frames:", np.sum(utt_lengths["acoustic"]["train"]))
-
-
-
-
 X_min = {}
 X_max = {}
 Y_mean = {}
@@ -152,43 +127,6 @@ for typ in ["acoustic"]:
 
 
 from torch.utils import data as data_utils
-import torch
-
-class PyTorchDataset(torch.utils.data.Dataset):
-    """Thin dataset wrapper for pytorch
-    
-    This does just two things:
-        1. On-demand normalization
-        2. Returns torch.tensor instead of ndarray
-    """
-    def __init__(self, X, Y, lengths, X_min, X_max, Y_mean, Y_scale):
-        self.X = X
-        self.Y = Y
-        if isinstance(lengths, list):
-            lengths = np.array(lengths)[:,None]
-        elif isinstance(lengths, np.ndarray):
-            lengths = lengths[:,None]
-        self.lengths = lengths
-        self.X_min = X_min
-        self.X_max = X_max
-        self.Y_mean = Y_mean
-        self.Y_scale = Y_scale
-    def __getitem__(self, idx):
-        x, y = self.X[idx], self.Y[idx]
-        x = minmax_scale(x, self.X_min, self.X_max, feature_range=(0.01, 0.99))
-        y = scale(y, self.Y_mean, self.Y_scale)
-        l = torch.from_numpy(self.lengths[idx])
-        x, y = torch.from_numpy(x), torch.from_numpy(y)
-        return x, y, l
-    def __len__(self):
-        return len(self.X)
-
-
-# ##  Model
-# 
-# We use bidirectional LSTM-based RNNs. Using PyTorch, it's very easy to implement. To handle variable length sequences in mini-batch, we can use [PackedSequence](http://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.PackedSequence).
-
-# In[183]:
 
 
 import torch
@@ -217,7 +155,7 @@ class VAE(nn.Module):
 
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
-        out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
+        out, hc = self.lstm1(x.view(1, x.size()[0], -1))
         nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
         out = out[nonzero_indices]
         del nonzero_indices
@@ -269,12 +207,8 @@ model = VAE().to('cuda')
 import pandas as pd
 
 
-# In[259]:
-
-
 mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))
 mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
-print(len(mora_index_lists))
 mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
 
 
@@ -282,20 +216,6 @@ mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path i
 train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_lists_for_model, test_size=test_size,
                                                  random_state=random_state)
 
-#print(len(train_mora_index_lists))
-
-#print(len(X['acoustic']['train']))
-
-
-"""
-for i in range(90):
-    print(train_mora_index_lists[i].shape[0])
-    print(X['acoustic']['train'][i].shape[0])
-    print(train_mora_index_lists[i].shape[0] / X['acoustic']['train'][i].shape[0])
-"""
-
-
-#print(X['acoustic']['train'][i].shape)
 
 device='cuda'
 model = VAE().to(device)
@@ -305,7 +225,6 @@ start = time.time()
 
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
-    #ここがおかしい
     MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
     #print('LOSS')
     #print(BCE)
@@ -335,8 +254,6 @@ test_mora_index_lists = [test_mora_index_lists[i] for i in range(len(test_mora_i
 train_loader = [[X_acoustic_train[i], Y_acoustic_train[i], train_mora_index_lists[i]] for i in range(len(train_mora_index_lists))]
 test_loader = [[X_acoustic_test[i], Y_acoustic_test[i], test_mora_index_lists[i]] for i in range(len(test_mora_index_lists))]
 
-print('X[min, max] ', X_min['acoustic'], X_max['acoustic'])
-print('Y[mean, scalse] ', Y_mean['acoustic'], Y_scale['acoustic'])
 
 def train(epoch):
     model.train()
@@ -365,14 +282,12 @@ def train(epoch):
         train_loss += loss.item()
         optimizer.step()
         del tmp
-        #del train_loader[batch_idx]
         if batch_idx % 4945 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx, train_num,
                 100. * batch_idx / train_num,
                 loss.item()))
 
-        #torch.cuda.empty_cache()
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(
           epoch, train_loss / len(train_loader)))
@@ -402,14 +317,7 @@ def test(epoch):
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
             test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
-            """
-            if i == 0:
-                n = min(data.size(0), 8)
-                comparison = torch.cat([data[:n],
-                                      recon_batch.view(args.batch_size, 1, 28, 28)[:n]])
-                save_image(comparison.cpu(),
-                         'results/reconstruction_' + str(epoch) + '.png', nrow=n)
-            """
+
             del tmp
 
     test_loss /= len(test_loader)
@@ -450,12 +358,3 @@ for epoch in range(1, num_epochs + 1):
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
 torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum.pth')
-
-
-# ## Train
-# 
-# ### Configurations
-# 
-# Network hyper parameters and training configurations (learning rate, weight decay, etc).
-
-# In[200]:
