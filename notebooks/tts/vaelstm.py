@@ -155,7 +155,7 @@ class VAE(nn.Module):
 
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
-        out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
+        out, hc = self.lstm1(x.view(x.size()[0],1,  -1))
         nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
         out = out[nonzero_indices]
         del nonzero_indices
@@ -201,6 +201,7 @@ model = VAE().to('cuda')
 
 
 
+
 # In[104]:
 
 
@@ -236,7 +237,7 @@ def loss_function(recon_x, x, mu, logvar):
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     #print(KLD)
 
-    return MSE +  KLD
+    return MSE +  0.1 * KLD
 
 
 func_tensor = np.vectorize(torch.from_numpy)
@@ -262,18 +263,17 @@ def train(epoch):
         tmp = []
 
         
-        for j in range(3):
-            tmp.append(torch.from_numpy(data[j]).to(device))
+        #for j in range(3):
+        #    tmp.append(torch.from_numpy(data[j]).to(device))
         
 
-        """        
+        
         x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
         y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
         
         tmp.append(torch.from_numpy(x).to(device))
         tmp.append(torch.from_numpy(y).to(device))
         tmp.append(torch.from_numpy(data[2]).to(device))
-        """
         
 
         optimizer.zero_grad()
@@ -304,17 +304,16 @@ def test(epoch):
             tmp = []
 
      
-            for j in range(3):
-                tmp.append(torch.tensor(data[j]).to(device))
+            #for j in range(3):
+            #    tmp.append(torch.tensor(data[j]).to(device))
 
-            """
+            
             x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
             y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
             
             tmp.append(torch.from_numpy(x).to(device))
             tmp.append(torch.from_numpy(y).to(device))
             tmp.append(torch.from_numpy(data[2]).to(device))
-            """
             
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
@@ -334,7 +333,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 10
+num_epochs = 30
 
 #model.load_state_dict(torch.load('vae.pth'))
 
