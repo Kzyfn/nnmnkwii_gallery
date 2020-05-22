@@ -200,7 +200,7 @@ class VAE(nn.Module):
 model = VAE().to('cuda')
 
 
-
+model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst.pth'))
 # In[104]:
 
 
