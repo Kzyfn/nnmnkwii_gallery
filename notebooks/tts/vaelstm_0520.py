@@ -264,16 +264,7 @@ def train(epoch):
         
         for j in range(3):
             tmp.append(torch.from_numpy(data[j]).to(device))
-        
 
-        """
-        x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
-        y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
-        
-        tmp.append(torch.from_numpy(x).to(device))
-        tmp.append(torch.from_numpy(y).to(device))
-        tmp.append(torch.from_numpy(data[2]).to(device))
-        """
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
@@ -306,14 +297,6 @@ def test(epoch):
             for j in range(3):
                 tmp.append(torch.tensor(data[j]).to(device))
 
-            """
-            x = minmax_scale(data[0], X_min['acoustic'], X_max['acoustic'], feature_range=(0.01, 0.99))
-            y = scale(data[1], Y_mean['acoustic'], Y_scale['acoustic'])
-            
-            tmp.append(torch.from_numpy(x).to(device))
-            tmp.append(torch.from_numpy(y).to(device))
-            tmp.append(torch.from_numpy(data[2]).to(device))
-            """
 
             recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
             test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
@@ -332,7 +315,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 10
+num_epochs = 50
 
 #model.load_state_dict(torch.load('vae.pth'))
 
