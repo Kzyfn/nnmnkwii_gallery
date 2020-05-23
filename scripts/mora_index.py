@@ -11,8 +11,9 @@ for i, filepath in tqdm(enumerate(paths)):
     label = hts.load(filepath)
 
 
-    end_times = label.end_times
-    
+    end_times_ = label.end_times
+    end_times = []
+
     for j, end_time in enumerate(end_times_):
         str_tmp = str(label[j])
         if '-a+' in str_tmp or '-i+' in str_tmp or  '-u+' in str_tmp or  '-e+' in str_tmp or  '-o+' in str_tmp or  '-cl+' in str_tmp or  '-N+' in str_tmp or  '-A+' in str_tmp or '-I+' in str_tmp or  '-U+' in str_tmp or  '-E+' in str_tmp or  '-O+' in str_tmp:
