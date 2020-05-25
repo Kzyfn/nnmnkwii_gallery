@@ -25,7 +25,7 @@ for i, filepath in tqdm(enumerate(paths)):
 
     mora_index = np.array([0]*int(end_index[-1]))
 
-    mora_index = [1 if i in list(end_index.astype(int)) else 0 for i in range(end_index[-1].astype(int))]
+    mora_index = [1 if i in list(end_index.astype(int)) else 0 for i in range(end_index[-1].astype(int)+1)]
     indices = label.silence_frame_indices().astype(int)
     mora_index = np.delete(mora_index, indices, axis=0)
 
