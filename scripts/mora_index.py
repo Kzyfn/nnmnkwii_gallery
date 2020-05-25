@@ -17,7 +17,7 @@ for i, filepath in tqdm(enumerate(paths)):
     for j, end_time in enumerate(end_times_):
         str_tmp = str(label[j])
         if '-a+' in str_tmp or '-i+' in str_tmp or  '-u+' in str_tmp or  '-e+' in str_tmp or  '-o+' in str_tmp or  '-cl+' in str_tmp or  '-N+' in str_tmp or  '-A+' in str_tmp or '-I+' in str_tmp or  '-U+' in str_tmp or  '-E+' in str_tmp or  '-O+' in str_tmp:
-            end_times.append(end_time)
+            end_times.append(end_time-1)
 
 
     end_index = np.array(end_times) / 50000
