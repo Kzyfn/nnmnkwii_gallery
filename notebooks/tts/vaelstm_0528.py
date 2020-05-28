@@ -336,9 +336,10 @@ for epoch in range(1, num_epochs + 1):
 
     print(time.time() - start)
 
-    if epoch % 10 == 0:
+    if epoch % 1 == 0:
         torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst_'+str(epoch+10)+'.pth')
-
+        np.save('loss_list.npy', np.array(loss_list))
+        np.save('test_loss_list.npy', np.array(test_loss_list))
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
