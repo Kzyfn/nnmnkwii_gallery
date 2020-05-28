@@ -183,7 +183,7 @@ class VAE(nn.Module):
                 
 
         
-        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view(linguistic_features.size()[0]+1, 1, -1)
+        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view(linguistic_features.size()[0], 1, -1)
         
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
