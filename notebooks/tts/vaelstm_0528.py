@@ -200,7 +200,7 @@ class VAE(nn.Module):
 model = VAE().to('cuda')
 
 
-model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_50.pth'))
+#model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_50.pth'))
 # In[104]:
 
 
@@ -338,7 +338,7 @@ for epoch in range(1, num_epochs + 1):
     print(time.time() - start)
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst_'+str(epoch+50)+'.pth')
+        torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst_'+str(epoch)+'.pth')
 
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
