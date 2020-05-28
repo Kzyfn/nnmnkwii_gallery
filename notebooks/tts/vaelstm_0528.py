@@ -200,7 +200,7 @@ class VAE(nn.Module):
 model = VAE().to('cuda')
 
 
-#model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_50.pth'))
+model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_10.pth'))
 # In[104]:
 
 
@@ -235,8 +235,7 @@ def loss_function(recon_x, x, mu, logvar):
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     #print(KLD)
-
-    return MSE + 0.1 * KLD
+    return MSE +  KLD
 
 
 func_tensor = np.vectorize(torch.from_numpy)
@@ -338,7 +337,7 @@ for epoch in range(1, num_epochs + 1):
     print(time.time() - start)
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst_'+str(epoch)+'.pth')
+        torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst_'+str(epoch+10)+'.pth')
 
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
