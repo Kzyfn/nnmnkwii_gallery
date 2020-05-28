@@ -171,7 +171,7 @@ class VAE(nn.Module):
 
     def decode(self, z, linguistic_features, mora_index):
         
-        z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32).to('cuda')
+        z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to('cuda')
         count = 0
         prev_index = 0
         for i, mora_i in enumerate(mora_index):
@@ -336,10 +336,11 @@ for epoch in range(1, num_epochs + 1):
 
     print(time.time() - start)
 
-    if epoch % 1 == 0:
+    if epoch % 10 == 0:
         torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst_'+str(epoch+10)+'.pth')
         np.save('loss_list.npy', np.array(loss_list))
-        np.save('test_loss_list.npy', np.array(test_loss_list))
+np.save('test_loss_list.npy', np.array(test_loss_list))
+
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
