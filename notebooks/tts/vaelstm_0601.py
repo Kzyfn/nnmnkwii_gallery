@@ -85,7 +85,7 @@ class BinaryFileSource(FileDataSource):
         test_files = []
         #train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
-        for i, path in enumerate(file):
+        for i, path in enumerate(files):
             if (i - 1) % 20 == 0:#test
                 pass
             elif i % 20 == 0:#valid
