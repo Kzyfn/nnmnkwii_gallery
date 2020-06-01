@@ -217,13 +217,21 @@ import pandas as pd
 
 
 mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))
-mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
+#mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
 mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
 
+train_mora_index_lists = []
+test_mora_index_lists = []
+#train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
+for i, mora_i in enumerate(mora_index_lists_for_model):
+    if (i - 1) % 20 == 0:#test
+        pass
+    elif i % 20 == 0:#valid
+        test_mora_index_lists.append(mora_i)
+    else:
+        train_mora_index_lists.append(mora_i)
 
-train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_lists_for_model, test_size=test_size,
-                                                 random_state=random_state)
 
 
 device='cuda'
