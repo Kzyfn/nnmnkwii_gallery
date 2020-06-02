@@ -10,7 +10,6 @@ print(sys.path)
 sys.path.append('/usr/local/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
 sys.path.append('/Users/kazuya_yufune/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
 
-import time
 
 from nnmnkwii.datasets import FileDataSource, FileSourceDataset
 from nnmnkwii.datasets import PaddedFileSourceDataset, MemoryCacheDataset#これはなに？
@@ -73,6 +72,7 @@ acoustic_subphone_features = "coarse_coding" if use_phone_alignment else "full" 
 
 
 
+
 class BinaryFileSource(FileDataSource):
     def __init__(self, data_root, dim, train):
         self.data_root = data_root
@@ -80,19 +80,10 @@ class BinaryFileSource(FileDataSource):
         self.train = train
     def collect_files(self):
         files = sorted(glob(join(self.data_root, "*.bin")))
-        #files = files[:len(files)-5] # last 5 is real testset
-        train_files = []
-        test_files = []
-        #train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
+        files = files[:len(files)-5] # last 5 is real testset
 
-        for i, path in enumerate(files):
-            if (i - 1) % 20 == 0:#test
-                pass
-            elif i % 20 == 0:#valid
-                test_files.append(path)
-            else:
-                train_files.append(path)
-
+        train_files, test_files = train_test_split(files, test_size=test_size,
+                                                  # random_state=random_state)
         if self.train:
             return train_files
         else:
@@ -101,10 +92,10 @@ class BinaryFileSource(FileDataSource):
         return np.fromfile(path, dtype=np.float32).reshape(-1, self.dim)
 
 
-X = {"acoustic": {}}
-Y = {"acoustic": {}}
-utt_lengths = { "acoustic": {}}
-for ty in ["acoustic"]:
+X = {"duration":{}, "acoustic": {}}
+Y = {"duration":{}, "acoustic": {}}
+utt_lengths = {"duration":{}, "acoustic": {}}
+for ty in ["duration", "acoustic"]:
     for phase in ["train", "test"]:
         train = phase == "train"
         x_dim = duration_linguistic_dim if ty == "duration" else acoustic_linguisic_dim
@@ -121,13 +112,40 @@ for ty in ["acoustic"]:
 
 
 
+for ty in ["duration", "acoustic"]:
+    for phase in ["train", "test"]:
+        train = phase == "train"
+        x_dim = duration_linguistic_dim if ty == "duration" else acoustic_linguisic_dim
+        y_dim = duration_dim if ty == "duration" else acoustic_dim
+        X[ty][phase] = PaddedFileSourceDataset(BinaryFileSource(join(DATA_ROOT, "X_{}".format(ty)),
+                                                       dim=x_dim,
+                                                       train=train), 
+                                               np.max(utt_lengths[ty][phase]))
+        Y[ty][phase] = PaddedFileSourceDataset(BinaryFileSource(join(DATA_ROOT, "Y_{}".format(ty)),
+                                                       dim=y_dim,
+                                                       train=train), 
+                                               np.max(utt_lengths[ty][phase]))
+
+
+
+print("Total number of utterances:", len(utt_lengths["duration"]["train"]))
+print("Total number of frames:", np.sum(utt_lengths["duration"]["train"]))
+
+
+
+print("Total number of utterances:", len(utt_lengths["acoustic"]["train"]))
+print("Total number of frames:", np.sum(utt_lengths["acoustic"]["train"]))
+
+
+
+
 X_min = {}
 X_max = {}
 Y_mean = {}
 Y_var = {}
 Y_scale = {}
 
-for typ in ["acoustic"]:
+for typ in ["acoustic", "duration"]:
     X_min[typ], X_max[typ] = minmax(X[typ]["train"], utt_lengths[typ]["train"])
     Y_mean[typ], Y_var[typ] = meanvar(Y[typ]["train"], utt_lengths[typ]["train"])
     Y_scale[typ] = np.sqrt(Y_var[typ])
@@ -136,39 +154,76 @@ for typ in ["acoustic"]:
 
 
 from torch.utils import data as data_utils
+import torch
+
+class PyTorchDataset(torch.utils.data.Dataset):
+    """Thin dataset wrapper for pytorch
+    
+    This does just two things:
+        1. On-demand normalization
+        2. Returns torch.tensor instead of ndarray
+    """
+    def __init__(self, X, Y, lengths, X_min, X_max, Y_mean, Y_scale):
+        self.X = X
+        self.Y = Y
+        if isinstance(lengths, list):
+            lengths = np.array(lengths)[:,None]
+        elif isinstance(lengths, np.ndarray):
+            lengths = lengths[:,None]
+        self.lengths = lengths
+        self.X_min = X_min
+        self.X_max = X_max
+        self.Y_mean = Y_mean
+        self.Y_scale = Y_scale
+    def __getitem__(self, idx):
+        x, y = self.X[idx], self.Y[idx]
+        x = minmax_scale(x, self.X_min, self.X_max, feature_range=(0.01, 0.99))
+        y = scale(y, self.Y_mean, self.Y_scale)
+        l = torch.from_numpy(self.lengths[idx])
+        x, y = torch.from_numpy(x), torch.from_numpy(y)
+        return x, y, l
+    def __len__(self):
+        return len(self.X)
+
+
+# ##  Model
+# 
+# We use bidirectional LSTM-based RNNs. Using PyTorch, it's very easy to implement. To handle variable length sequences in mini-batch, we can use [PackedSequence](http://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.PackedSequence).
+
+# In[183]:
 
 
 import torch
 from torch import nn
 from torch.autograd import Variable
 from tqdm import tnrange, tqdm
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
 from torch import optim
 import torch.nn.functional as F
 
-z_dim = 1
 
-dropout=0.3
+
 
 class VAE(nn.Module):
-    def __init__(self, bidirectional=True, num_layers=2):
+    def __init__(self, bidirectional=True, num_layers=1):
         super(VAE, self).__init__()
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
 
-        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
-        self.fc21 = nn.Linear(self.num_direction*400, z_dim)
-        self.fc22 = nn.Linear(self.num_direction*400, z_dim)
+        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional,  batch_first=True)#入力サイズはここできまる
+        self.fc21 = nn.Linear(self.num_direction*400, 1)
+        self.fc22 = nn.Linear(self.num_direction*400, 1)
         ##ここまでエンコーダ
         
-        self.lstm2 = nn.LSTM(acoustic_linguisic_dim + z_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)
+        self.lstm2 = nn.LSTM(acoustic_linguisic_dim+1, 400, num_layers, bidirectional=bidirectional,  batch_first=True)
         self.fc3 = nn.Linear(self.num_direction*400, acoustic_dim)
 
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
-        out, hc = self.lstm1(x.view( x.size()[0],1, -1))
-        nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
-        out = out[nonzero_indices]
-        del nonzero_indices
+        out, hc = self.lstm1(x.view(x.size()[0], 1, -1))
+        out = out[torch.where(mora_index>0)]
         
         h1 = F.relu(out)
 
@@ -181,24 +236,20 @@ class VAE(nn.Module):
 
     def decode(self, z, linguistic_features, mora_index):
         
-        z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to('cuda')
+        z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32)
         count = 0
-        prev_index = 0
-        for i, mora_i in enumerate(mora_index):
+        for mora_i in mora_index.numpy():
             if mora_i == 1:
-                z_tmp[prev_index:i] = z[count]
-                prev_index = i
+                z_tmp[int(mora_i)] = z[count]
                 count += 1
-                
-                
 
         
-        x = torch.cat([linguistic_features, z_tmp.view(-1, z_dim)], dim=1).view(linguistic_features.size()[0], 1, -1)
+        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view(linguistic_features.size()[0], 1, -1)
         
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
         
-        return self.fc3(h3)#torch.sigmoid(self.fc3(h3))
+        return torch.sigmoid(self.fc3(h3))
 
     def forward(self, linguistic_features, acoustic_features, mora_index):
         mu, logvar = self.encode(linguistic_features, acoustic_features, mora_index)
@@ -207,66 +258,69 @@ class VAE(nn.Module):
         return self.decode(z, linguistic_features, mora_index), mu, logvar
 
 
-model = VAE().to('cuda')
+model = VAE().to('cpu')
 
 
-#model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_10.pth'))
+
 # In[104]:
 
 
 import pandas as pd
 
 
-mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))
-#mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
+# In[259]:
+
+
+mora_index_lists = sorted(glob(join('data/NIT-ATR503/mora_index', "*.csv")))[:100]
+mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
+
 mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
 
-train_mora_index_lists = []
-test_mora_index_lists = []
-#train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
-for i, mora_i in enumerate(mora_index_lists_for_model):
-    if (i - 1) % 20 == 0:#test
-        pass
-    elif i % 20 == 0:#valid
-        test_mora_index_lists.append(mora_i)
-    else:
-        train_mora_index_lists.append(mora_i)
+
+train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_lists_for_model, test_size=test_size,
+                                                  random_state=random_state)
+
+
+
+
+
+
+
+for i in range(90):
+    print(np.array(pd.read_csv(mora_index_lists[i])).reshape(-1).shape[0] / X['acoustic']['train'][i].shape[0])
+
+
 
 
 
 device='cuda'
 model = VAE().to(device)
-optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-start = time.time()
 
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
-    MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
-    #print('LOSS')
-    #print(BCE)
+    BCE = F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
 
     # see Appendix B from VAE paper:
     # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
     # https://arxiv.org/abs/1312.6114
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    #print(KLD)
-    return MSE +  KLD
+
+    return BCE + KLD
 
 
 func_tensor = np.vectorize(torch.from_numpy)
 
-X_acoustic_train = [X['acoustic']['train'][i] for i in range(len(X['acoustic']['train']))] 
-Y_acoustic_train = [Y['acoustic']['train'][i] for i in range(len(Y['acoustic']['train']))]
-train_mora_index_lists = [train_mora_index_lists[i] for i in range(len(train_mora_index_lists))]
+X_acoustic_train = [torch.from_numpy(X['acoustic']['train'][i]) for i in range(len(X['acoustic']['train']))] 
+Y_acoustic_train = [torch.from_numpy(Y['acoustic']['train'][i]) for i in range(len(Y['acoustic']['train']))]
+train_mora_index_lists = [torch.tensor(train_mora_index_lists[i]) for i in range(len(train_mora_index_lists))]
 
-train_num = len(X_acoustic_train)
-
-X_acoustic_test = [X['acoustic']['test'][i] for i in range(len(X['acoustic']['test']))]
-Y_acoustic_test = [Y['acoustic']['test'][i] for i in range(len(Y['acoustic']['test']))]
-test_mora_index_lists = [test_mora_index_lists[i] for i in range(len(test_mora_index_lists))]
+X_acoustic_test = [torch.from_numpy(X['acoustic']['test'][i]) for i in range(len(X['acoustic']['test']))]
+Y_acoustic_test = [torch.from_numpy(Y['acoustic']['test'][i]) for i in range(len(Y['acoustic']['test']))]
+test_mora_index_lists = [torch.tensor(test_mora_index_lists[i]) for i in range(len(test_mora_index_lists))]
 
 train_loader = [[X_acoustic_train[i], Y_acoustic_train[i], train_mora_index_lists[i]] for i in range(len(train_mora_index_lists))]
 test_loader = [[X_acoustic_test[i], Y_acoustic_test[i], test_mora_index_lists[i]] for i in range(len(test_mora_index_lists))]
@@ -276,31 +330,24 @@ def train(epoch):
     model.train()
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
-        tmp = []
-
-        
         for j in range(3):
-            tmp.append(torch.from_numpy(data[j]).to(device))
-
-
+            data[j] = data[j].to(device)
         optimizer.zero_grad()
-        recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
-        loss = loss_function(recon_batch, tmp[1], mu, logvar)
+        recon_batch, mu, logvar = model(data[0], data[1], data[2])
+        loss = loss_function(recon_batch, data[1], mu, logvar)
         loss.backward()
         train_loss += loss.item()
         optimizer.step()
-        del tmp
-        if batch_idx % 4945 == 0:
+        if batch_idx % 5 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx, train_num,
-                100. * batch_idx / train_num,
-                loss.item()))
-
+                epoch, batch_idx * len(data), len(train_loader),
+                100. * batch_idx / len(train_loader),
+                loss.item() / len(data)))
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(
-          epoch, train_loss / len(train_loader)))
+          epoch, train_loss / 1))
     
-    return train_loss / len(train_loader)
+    return train_loss
 
 
 def test(epoch):
@@ -308,19 +355,20 @@ def test(epoch):
     test_loss = 0
     with torch.no_grad():
         for i, data, in enumerate(test_loader):
-            tmp = []
-
-     
             for j in range(3):
-                tmp.append(torch.tensor(data[j]).to(device))
+                data[j] = data[j].to(device)
+            recon_batch, mu, logvar = model(data[0], data[1], data[2])
+            test_loss += loss_function(recon_batch, data[1], mu, logvar).item()
+            """
+            if i == 0:
+                n = min(data.size(0), 8)
+                comparison = torch.cat([data[:n],
+                                      recon_batch.view(args.batch_size, 1, 28, 28)[:n]])
+                save_image(comparison.cpu(),
+                         'results/reconstruction_' + str(epoch) + '.png', nrow=n)
+            """
 
-
-            recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
-            test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
-
-            del tmp
-
-    test_loss /= len(test_loader)
+    test_loss /= 1
     print('====> Test set loss: {:.4f}'.format(test_loss))
     
     return test_loss
@@ -332,8 +380,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 40
-
+num_epochs = 5
 
 for epoch in range(1, num_epochs + 1):
     loss = train(epoch)
@@ -351,14 +398,16 @@ for epoch in range(1, num_epochs + 1):
     loss_list.append(loss)
     test_loss_list.append(test_loss)
 
-    print(time.time() - start)
-
-    if epoch % 5 == 0:
-        torch.save(model.state_dict(), 'vae_lstm2layers'+str(epoch)+'.pth')
-        np.save('loss_list.npy', np.array(loss_list))
-        np.save('test_loss_list.npy', np.array(test_loss_list))
-
 # save the training model
 np.save('loss_list.npy', np.array(loss_list))
 np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_lstm2layers.pth')
+torch.save(model.state_dict(), 'vae.pth')
+
+
+# ## Train
+# 
+# ### Configurations
+# 
+# Network hyper parameters and training configurations (learning rate, weight decay, etc).
+
+# In[200]:

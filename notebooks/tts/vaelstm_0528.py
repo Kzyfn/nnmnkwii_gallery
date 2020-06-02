@@ -80,10 +80,19 @@ class BinaryFileSource(FileDataSource):
         self.train = train
     def collect_files(self):
         files = sorted(glob(join(self.data_root, "*.bin")))
-        files = files[:len(files)-5] # last 5 is real testset
+        #files = files[:len(files)-5] # last 5 is real testset
+        train_files = []
+        test_files = []
+        #train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
-        train_files, test_files = train_test_split(files, test_size=test_size,
-                                                   random_state=random_state)
+        for i, path in enumerate(files):
+            if (i - 1) % 20 == 0:#test
+                pass
+            elif i % 20 == 0:#valid
+                test_files.append(path)
+            else:
+                train_files.append(path)
+
         if self.train:
             return train_files
         else:
@@ -137,7 +146,8 @@ from torch import optim
 import torch.nn.functional as F
 
 
-
+z_dim = 1
+dropout=0.3
 
 class VAE(nn.Module):
     def __init__(self, bidirectional=True, num_layers=1):
@@ -145,12 +155,12 @@ class VAE(nn.Module):
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
 
-        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional)#入力サイズはここできまる
-        self.fc21 = nn.Linear(self.num_direction*400, 1)
-        self.fc22 = nn.Linear(self.num_direction*400, 1)
+        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
+        self.fc21 = nn.Linear(self.num_direction*400, z_dim)
+        self.fc22 = nn.Linear(self.num_direction*400, z_dim)
         ##ここまでエンコーダ
         
-        self.lstm2 = nn.LSTM(acoustic_linguisic_dim+1, 400, num_layers, bidirectional=bidirectional)
+        self.lstm2 = nn.LSTM(acoustic_linguisic_dim+z_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)
         self.fc3 = nn.Linear(self.num_direction*400, acoustic_dim)
 
     def encode(self, linguistic_f, acoustic_f, mora_index):
@@ -183,7 +193,7 @@ class VAE(nn.Module):
                 
 
         
-        x = torch.cat([linguistic_features, z_tmp.view(-1, 1)], dim=1).view(linguistic_features.size()[0], 1, -1)
+        x = torch.cat([linguistic_features, z_tmp.view(-1, z_dim)], dim=1).view(linguistic_features.size()[0], 1, -1)
         
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
@@ -200,7 +210,7 @@ class VAE(nn.Module):
 model = VAE().to('cuda')
 
 
-model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_10.pth'))
+#model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_10.pth'))
 # In[104]:
 
 
@@ -208,13 +218,20 @@ import pandas as pd
 
 
 mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))
-mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
+#mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
 mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
 
+train_mora_index_lists = []
+test_mora_index_lists = []
+#train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
-
-train_mora_index_lists, test_mora_index_lists = train_test_split(mora_index_lists_for_model, test_size=test_size,
-                                                 random_state=random_state)
+for i, mora_i in enumerate(mora_index_lists_for_model):
+    if (i - 1) % 20 == 0:#test
+        pass
+    elif i % 20 == 0:#valid
+        test_mora_index_lists.append(mora_i)
+    else:
+        train_mora_index_lists.append(mora_i)
 
 
 device='cuda'
@@ -336,12 +353,12 @@ for epoch in range(1, num_epochs + 1):
 
     print(time.time() - start)
 
-    if epoch % 1 == 0:
-        torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst_'+str(epoch+10)+'.pth')
+    if epoch % 10 == 0:
+        torch.save(model.state_dict(), 'vae_mse_z_10dim_'+str(epoch+10)+'.pth')
         np.save('loss_list.npy', np.array(loss_list))
-np.save('test_loss_list.npy', np.array(test_loss_list))
+        np.save('test_loss_list.npy', np.array(test_loss_list))
 
 # save the training model
-np.save('loss_list.npy', np.array(loss_list))
-np.save('test_loss_list.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_mse_0.01kld_z_changed_losssum_batchfirst.pth')
+np.save('loss_list_lstm1layer_z10dim.npy', np.array(loss_list))
+np.save('test_loss_list_lstm1layer_z10dim.npy', np.array(test_loss_list))
+torch.save(model.state_dict(), 'vae_mse_0.vae_mse_z_10dim.pth')
