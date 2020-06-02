@@ -171,7 +171,7 @@ class VAE(nn.Module):
         
         h1 = F.relu(out)
 
-        return torch.sigmoid(self.fc21(h1)), self.fc22(h1)
+        return self.fc21(h1), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5*logvar)
@@ -331,7 +331,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 100
+num_epochs = 40
 
 #model.load_state_dict(torch.load('vae.pth'))
 
