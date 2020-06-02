@@ -13,7 +13,7 @@ sys.path.append('/Users/kazuya_yufune/.pyenv/versions/3.6.0/lib/python3.6/site-p
 import time
 
 from nnmnkwii.datasets import FileDataSource, FileSourceDataset
-from nnmnkwii.datasets import PaddedFileSourceDataset, MemoryCacheDataset#これはなに？
+from nnmnkwii.datasets import PaddedFileSourceDataset, MemoryCacheDataset#これはなに
 from nnmnkwii.preprocessing import trim_zeros_frames, remove_zeros_frames
 from nnmnkwii.preprocessing import minmax, meanvar, minmax_scale, scale
 from nnmnkwii import paramgen
@@ -149,6 +149,8 @@ import torch.nn.functional as F
 z_dim = 2
 dropout=0.3
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 class VAE(nn.Module):
     def __init__(self, bidirectional=True, num_layers=1):
         super(VAE, self).__init__()
@@ -181,7 +183,7 @@ class VAE(nn.Module):
 
     def decode(self, z, linguistic_features, mora_index):
         
-        z_tmp = torch.tensor([0]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to('cuda')
+        z_tmp = torch.tensor([[0]*z_dim]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to(device)
         count = 0
         prev_index = 0
         for i, mora_i in enumerate(mora_index):
@@ -207,7 +209,7 @@ class VAE(nn.Module):
         return self.decode(z, linguistic_features, mora_index), mu, logvar
 
 
-model = VAE().to('cuda')
+
 
 
 #model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_10.pth'))
@@ -234,7 +236,7 @@ for i, mora_i in enumerate(mora_index_lists_for_model):
         train_mora_index_lists.append(mora_i)
 
 
-device='cuda'
+
 model = VAE().to(device)
 optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
 
