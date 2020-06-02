@@ -355,10 +355,10 @@ for epoch in range(1, num_epochs + 1):
 
     if epoch % 5 == 0:
         torch.save(model.state_dict(), 'vae_lstm2layers'+str(epoch)+'.pth')
-        np.save('loss_list.npy', np.array(loss_list))
-        np.save('test_loss_list.npy', np.array(test_loss_list))
+        np.save('loss_list_vae_lstm2layers.npy', np.array(loss_list))
+        np.save('test_loss_list_vae_lstm2layers.npy', np.array(test_loss_list))
 
 # save the training model
-np.save('loss_list.npy', np.array(loss_list))
-np.save('test_loss_list.npy', np.array(test_loss_list))
+np.save('loss_list_vae_lstm2layers.npy', np.array(loss_list))
+np.save('test_loss_list_vae_lstm2layers.npy', np.array(test_loss_list))
 torch.save(model.state_dict(), 'vae_lstm2layers.pth')
