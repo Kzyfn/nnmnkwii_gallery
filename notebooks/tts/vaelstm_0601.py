@@ -354,11 +354,11 @@ for epoch in range(1, num_epochs + 1):
     print(time.time() - start)
 
     if epoch % 5 == 0:
-        torch.save(model.state_dict(), 'vae_lstm2layers'+str(epoch)+'.pth')
-        np.save('loss_list_vae_lstm2layers.npy', np.array(loss_list))
-        np.save('test_loss_list_vae_lstm2layers.npy', np.array(test_loss_list))
+        torch.save(model.state_dict(), 'lstm2layers_0.3d_z1dim/vae_lstm2layers'+str(epoch)+'.pth')
+        np.save('lstm2layers_0.3d_z1dim/loss_list_vae_lstm2layers.npy', np.array(loss_list))
+        np.save('lstm2layers_0.3d_z1dim/test_loss_list_vae_lstm2layers.npy', np.array(test_loss_list))
 
 # save the training model
-np.save('loss_list_vae_lstm2layers.npy', np.array(loss_list))
-np.save('test_loss_list_vae_lstm2layers.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), 'vae_lstm2layers.pth')
+np.save('lstm2layers_0.3d_z1dim/loss_list_vae_lstm2layers.npy', np.array(loss_list))
+np.save('lstm2layers_0.3d_z1dim/test_loss_list_vae_lstm2layers.npy', np.array(test_loss_list))
+torch.save(model.state_dict(), 'lstm2layers_0.3d_z1dim/vae_lstm2layers.pth')
