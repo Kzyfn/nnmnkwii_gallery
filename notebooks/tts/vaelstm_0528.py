@@ -355,8 +355,8 @@ for epoch in range(1, num_epochs + 1):
 
     if epoch % 10 == 0:
         torch.save(model.state_dict(), 'vae_mse_z_10dim_'+str(epoch+10)+'.pth')
-        np.save('loss_list.npy', np.array(loss_list))
-        np.save('test_loss_list.npy', np.array(test_loss_list))
+    np.save('loss_list.npy', np.array(loss_list))
+    np.save('test_loss_list.npy', np.array(test_loss_list))
 
 # save the training model
 np.save('loss_list_lstm1layer_z10dim.npy', np.array(loss_list))
