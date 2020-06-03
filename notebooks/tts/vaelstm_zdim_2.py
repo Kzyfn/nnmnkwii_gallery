@@ -333,7 +333,7 @@ def test(epoch):
 
 loss_list = []
 test_loss_list = []
-num_epochs = 100
+num_epochs = 30
 
 #model.load_state_dict(torch.load('vae.pth'))
 
@@ -356,7 +356,7 @@ for epoch in range(1, num_epochs + 1):
     print(time.time() - start)
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), '1layers_zdim2/vae_mse_z_2dim_'+str(epoch+10)+'.pth')
+        torch.save(model.state_dict(), '1layers_zdim2/vae_mse_z_2dim_'+str(epoch)+'.pth')
         np.save('1layers_zdim2/loss_listz_2dim_.npy', np.array(loss_list))
         np.save('1layers_zdim2/test_loss_listz_2dim_.npy', np.array(test_loss_list))
 
