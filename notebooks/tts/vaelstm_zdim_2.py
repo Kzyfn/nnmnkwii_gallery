@@ -148,7 +148,7 @@ import torch.nn.functional as F
 
 z_dim = 4
 dropout = 0.3
-num_layers = 2
+num_layers = 1
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -357,11 +357,11 @@ for epoch in range(1, num_epochs + 1):
     print(time.time() - start)
 
     if epoch % 5 == 0:
-        torch.save(model.state_dict(), '2layers_zdim4/vae_mse_z_2dim_'+str(epoch)+'.pth')
-    np.save('2layers_zdim4/loss_listz_2dim_.npy', np.array(loss_list))
-    np.save('2layers_zdim4/test_loss_listz_2dim_.npy', np.array(test_loss_list))
+        torch.save(model.state_dict(), str(num_layers) +'layers_zdim' + str(z_dim) +'/vae_mse'+str(epoch)+'.pth')
+    np.save(str(num_layers) +'layers_zdim' + str(z_dim) +'/loss_listz_2dim_.npy', np.array(loss_list))
+    np.save(str(num_layers) +'layers_zdim' + str(z_dim) +'/test_loss_listz_2dim_.npy', np.array(test_loss_list))
 
 # save the training model
-np.save('2layers_zdim4/loss_list_lstm1layer_z2dim.npy', np.array(loss_list))
-np.save('2layers_zdim4/test_loss_list_lstm1layer_z2dim.npy', np.array(test_loss_list))
-torch.save(model.state_dict(), '2layers_zdim4/vae_mse_0.vae_mse_z_2dim.pth')
+np.save(str(num_layers) +'layers_zdim' + str(z_dim) +'/loss_list_lstm1layer_z2dim.npy', np.array(loss_list))
+np.save(str(num_layers) +'layers_zdim' + str(z_dim) +'/test_loss_list_lstm1layer_z2dim.npy', np.array(test_loss_list))
+torch.save(model.state_dict(), str(num_layers) +'layers_zdim' + str(z_dim) +'/vae_mse_0.vae_mse_z_2dim.pth')
