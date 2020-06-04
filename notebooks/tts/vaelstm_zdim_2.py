@@ -213,7 +213,7 @@ class VAE(nn.Module):
 
 
 
-model.load_state_dict(torch.load('1layers_zdim4/vae_mse30.pth'))
+
 # In[104]:
 
 
@@ -239,6 +239,7 @@ for i, mora_i in enumerate(mora_index_lists_for_model):
 
 
 model = VAE().to(device)
+model.load_state_dict(torch.load('1layers_zdim4/vae_mse30.pth'))
 optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
 
 start = time.time()
