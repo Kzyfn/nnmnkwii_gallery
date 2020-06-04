@@ -213,7 +213,7 @@ class VAE(nn.Module):
 
 
 
-#model.load_state_dict(torch.load('vae_mse_0.01kld_z_changed_losssum_batchfirst_10.pth'))
+model.load_state_dict(torch.load('1layers_zdim4/vae_mse30.pth'))
 # In[104]:
 
 
@@ -357,7 +357,7 @@ for epoch in range(1, num_epochs + 1):
     print(time.time() - start)
 
     if epoch % 5 == 0:
-        torch.save(model.state_dict(), str(num_layers) +'layers_zdim' + str(z_dim) +'/vae_mse'+str(epoch)+'.pth')
+        torch.save(model.state_dict(), str(num_layers) +'layers_zdim' + str(z_dim) +'/vae_mse'+str(epoch+30)+'.pth')
     np.save(str(num_layers) +'layers_zdim' + str(z_dim) +'/loss_listz_2dim_.npy', np.array(loss_list))
     np.save(str(num_layers) +'layers_zdim' + str(z_dim) +'/test_loss_listz_2dim_.npy', np.array(test_loss_list))
 
