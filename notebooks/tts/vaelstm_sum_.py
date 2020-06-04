@@ -198,7 +198,7 @@ dropout= args.dropout_ratio
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class VAE(nn.Module):
-    def __init__(self, bidirectional=True, num_layers=args.num_layers):
+    def __init__(self, bidirectional=True, num_layers=args.num_lstm_layers):
         super(VAE, self).__init__()
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
