@@ -149,7 +149,7 @@ class Rnn(nn.Module):
 
     def decode(self, linguistic_features):
         
-        h3, (h, c) = self.lstm2(linguistic_features)
+        h3, (h, c) = self.lstm2(linguistic_features.view(linguistic_features.size()[0], 1, -1))
         h3 = F.relu(h3)
         
         return self.fc3(h3)#torch.sigmoid(self.fc3(h3))
