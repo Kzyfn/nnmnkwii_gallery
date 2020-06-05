@@ -155,10 +155,8 @@ class Rnn(nn.Module):
         return self.fc3(h3)#torch.sigmoid(self.fc3(h3))
 
     def forward(self, linguistic_features):
-        mu, logvar = self.encode(linguistic_features)
-        z = self.reparameterize(mu, logvar)
         
-        return self.decode(z, linguistic_features)
+        return self.decode(linguistic_features)
 
 
 
@@ -219,7 +217,7 @@ def train(epoch):
         
 
         optimizer.zero_grad()
-        recon_batch, mu, logvar = model(tmp[0])
+        recon_batch = model(tmp[0])
         loss = loss_function(recon_batch, tmp[1])
         loss.backward()
         train_loss += loss.item()
@@ -249,7 +247,7 @@ def test(epoch):
             for j in range(2):
                 tmp.append(torch.tensor(data[j]).to(device))
 
-            recon_batch, mu, logvar = model(tmp[0])
+            recon_batch = model(tmp[0])
             test_loss += loss_function(recon_batch, tmp[1]).item()
 
             del tmp
