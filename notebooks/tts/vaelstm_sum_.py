@@ -203,7 +203,7 @@ class VAE(nn.Module):
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
 
-        self.lstm1 = nn.LSTM(acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)
+        self.lstm1 = nn.LSTM(acoustic_dim, 400, 1, bidirectional=bidirectional, dropout=dropout)
         self.fc21 = nn.Linear(self.num_direction*400, z_dim)
         self.fc22 = nn.Linear(self.num_direction*400, z_dim)
         ##encoder  
