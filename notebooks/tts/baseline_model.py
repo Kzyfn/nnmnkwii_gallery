@@ -287,6 +287,9 @@ for epoch in range(1, num_epochs + 1):
     loss_list.append(loss)
     test_loss_list.append(test_loss)
 
+    np.save('loss_list_baseline.npy', np.array(loss_list))
+    np.save('test_loss_list_baseline.npy', np.array(test_loss_list))
+
     print(time.time() - start)
 
 # save the training model
