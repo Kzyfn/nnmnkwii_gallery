@@ -137,7 +137,7 @@ import torch.nn.functional as F
 
 class Rnn(nn.Module):
     def __init__(self, bidirectional=True, num_layers=1):
-        super(VAE, self).__init__()
+        super(Rnn, self).__init__()
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
         ##ここまでエンコーダ
