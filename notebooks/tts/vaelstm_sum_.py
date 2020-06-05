@@ -5,7 +5,7 @@ import os
 import argparse
 
 import sys
-print(sys.path)
+#print(sys.path)
 #sys.path.remove('/usr/local/lib/python3.7/site-packages')
 sys.path.append('/usr/local/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
 sys.path.append('/Users/kazuya_yufune/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
@@ -308,7 +308,7 @@ start = time.time()
 
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
-    MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
+    MSE = F.mse_loss(recon_x.view(-1,1), x.contiguous().view(-1, 1), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
     #print('LOSS')
     #print(BCE)
 
@@ -350,7 +350,9 @@ def train(epoch):
 
         optimizer.zero_grad()
         lf0, mu, logvar, reconstrution = model(tmp[0], tmp[1], tmp[2])
-        loss = loss_function(lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar) + F.mse_loss(reconstrution.view(-1), tmp[1].view(-1, ), reduction='sum')
+        #print(lf0.size())
+        #print(tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim].size())
+        loss = loss_function(lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar) + F.mse_loss(reconstrution.view(-1,1), tmp[1].view(-1,1 ), reduction='sum')
         loss.backward()
         train_loss += loss.item()
         optimizer.step()
