@@ -146,7 +146,7 @@ from torch import optim
 import torch.nn.functional as F
 
 
-z_dim = 4
+z_dim = 8
 dropout = 0.3
 num_layers = 1
 
@@ -280,7 +280,6 @@ def train(epoch):
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
         tmp = []
-
         
         for j in range(3):
             tmp.append(torch.from_numpy(data[j]).to(device))
