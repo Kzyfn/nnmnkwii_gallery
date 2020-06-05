@@ -161,7 +161,6 @@ class Rnn(nn.Module):
         return self.decode(z, linguistic_features)
 
 
-model = VAE().to('cuda')
 
 
 
@@ -173,7 +172,7 @@ import pandas as pd
 
 
 device='cuda'
-model = VAE().to(device)
+model = Rnn().to(device)
 optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
 
 start = time.time()
