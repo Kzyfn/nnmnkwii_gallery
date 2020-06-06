@@ -152,13 +152,13 @@ num_layers = 1
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-class VAE(nn.Module):c
+class VAE(nn.Module):
     def __init__(self, bidirectional=True, num_layers=num_layers):
         super(VAE, self).__init__()
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
 
-        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
+        self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, 1, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
         self.fc21 = nn.Linear(self.num_direction*400, z_dim)
         self.fc22 = nn.Linear(self.num_direction*400, z_dim)
         ##ここまでエンコーダ
