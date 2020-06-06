@@ -146,13 +146,13 @@ from torch import optim
 import torch.nn.functional as F
 
 
-z_dim = 8
+z_dim = 32
 dropout = 0.3
-num_layers = 2
+num_layers = 1
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-class VAE(nn.Module):
+class VAE(nn.Module):c
     def __init__(self, bidirectional=True, num_layers=num_layers):
         super(VAE, self).__init__()
         self.num_layers = num_layers
