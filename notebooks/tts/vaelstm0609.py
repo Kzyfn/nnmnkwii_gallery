@@ -140,7 +140,7 @@ from torch import optim
 import torch.nn.functional as F
 
 
-z_dim = 64
+z_dim = 32
 dropout = 0.3
 num_layers = 1
 
