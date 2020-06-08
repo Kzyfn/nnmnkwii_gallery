@@ -203,7 +203,7 @@ class VAE(nn.Module):
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
 
-        self.lstm1 = nn.LSTM(acoustic_dim, 400, 1, bidirectional=bidirectional, dropout=dropout)
+        self.lstm1 = nn.LSTM(lf0_dim, 400, 1, bidirectional=bidirectional, dropout=dropout)
         self.fc21 = nn.Linear(self.num_direction*400, z_dim)
         self.fc22 = nn.Linear(self.num_direction*400, z_dim)
         ##encoder  
@@ -216,7 +216,7 @@ class VAE(nn.Module):
         self.fc4 = nn.Linear(self.num_direction*400, acoustic_dim)
 
     def encode(self, acoustic_f, mora_index):
-        x = acoustic_f
+        x = acoustic_f[:, lf0_start_idx:vuv_start_idx]
         out, hc = self.lstm1(x.view(x.size()[0],1, -1))
         nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
         out = out[nonzero_indices]
