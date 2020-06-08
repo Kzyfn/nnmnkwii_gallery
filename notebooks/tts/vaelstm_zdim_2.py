@@ -148,7 +148,7 @@ import torch.nn.functional as F
 
 z_dim = 1
 dropout = 0.3
-num_layers = 8
+num_layers = 1
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
