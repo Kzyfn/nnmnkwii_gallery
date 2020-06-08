@@ -422,7 +422,7 @@ for epoch in range(1, num_epochs + 1):
 
     print(time.time() - start)
 
-    if epoch % 10 == 0:
+    if epoch % 5 == 0:
         torch.save(model.state_dict(), args.output_dir + '/model_'+str(epoch)+'.pth')
     np.save(args.output_dir +'/loss_list.npy', np.array(loss_list))
     np.save(args.output_dir +'/test_loss_list.npy', np.array(test_loss_list))
