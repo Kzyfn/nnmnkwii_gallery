@@ -175,7 +175,7 @@ class VAE(nn.Module):
         
         h1 = F.relu(out)
 
-        return self.fc21(h1), self.fc22(h1)
+        return torch.sigmoid(self.fc21(h1)), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5*logvar)
