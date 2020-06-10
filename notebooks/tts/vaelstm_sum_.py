@@ -203,7 +203,7 @@ class VAE(nn.Module):
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
 
-        self.lstm1 = nn.LSTM(lf0_dim, 400, 1, bidirectional=bidirectional, dropout=dropout)
+        self.lstm1 = nn.LSTM(lf0_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)
         self.fc21 = nn.Linear(self.num_direction*400, z_dim)
         self.fc22 = nn.Linear(self.num_direction*400, z_dim)
         ##encoder  
@@ -211,9 +211,6 @@ class VAE(nn.Module):
         self.lstm2 = nn.LSTM(acoustic_linguisic_dim + z_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)
         self.fc3 = nn.Linear(self.num_direction*400, lf0_dim)
         #decoder
-
-        self.lstm3 = nn.LSTM(acoustic_linguisic_dim + z_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)
-        self.fc4 = nn.Linear(self.num_direction*400, acoustic_dim)
 
     def encode(self, acoustic_f, mora_index):
         x = acoustic_f[:, lf0_start_idx:vuv_start_idx]
@@ -270,8 +267,42 @@ class VAE(nn.Module):
         mu, logvar = self.encode(acoustic_features, mora_index)
         z = self.reparameterize(mu, logvar)
         
-        return self.decode(z, linguistic_features, mora_index), mu, logvar, self.reconstruction(z, linguistic_features, mora_index)
+        return self.decode(z, linguistic_features, mora_index), mu, logvar
 
+
+
+
+class Reconstructor(nn.Module):
+    def __init__(self, bidirectional=True, num_layers=args.num_lstm_layers):
+        super(Reconstructor, self).__init__()
+        self.num_layers = num_layers
+        self.num_direction =  2 if bidirectional else 1
+
+        self.lstm1 = nn.LSTM(lf0_dim, 400, 1, bidirectional=bidirectional, dropout=dropout)
+        self.fc1 = nn.Linear(self.num_direction*400, acoustic_dim)
+
+    def reconstruct(self, z, linguistic_features, mora_index):
+        z_tmp = torch.tensor([[0]*z_dim]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to(device)
+        count = 0
+        prev_index = 0
+        for i, mora_i in enumerate(mora_index):
+            if mora_i == 1:
+                z_tmp[prev_index:i] = z[count]
+                prev_index = i
+                count += 1
+        
+        x = torch.cat([linguistic_features, z_tmp.view(-1, z_dim)], dim=1).view(linguistic_features.size()[0], 1, -1)
+        
+        h3, (h, c) = self.lstm1(x)
+        h3 = F.relu(h3)
+        
+        return self.fc1(h3)#torch.sigmoid(self.fc3(h3))
+
+    def forward(self, vae_model, linguistic_features, acoustic_features ,mora_index):
+        with torch.no_grad():
+            mu, logvar = vae_model.encode(acoustic_features, mora_index)
+            z = vae_model.reparameterize(mu, logvar)
+        return reconstruct(z, linguistic_features, mora_index)
 
 
 
@@ -301,8 +332,8 @@ for i, mora_i in enumerate(mora_index_lists_for_model):
 
 
 
-model = VAE().to(device)
-optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
+model_vae = VAE().to(device)
+model_recon = Reconstructor().to(device)
 
 start = time.time()
 
@@ -337,8 +368,12 @@ train_loader = [[X_acoustic_train[i], Y_acoustic_train[i], train_mora_index_list
 test_loader = [[X_acoustic_test[i], Y_acoustic_test[i], test_mora_index_lists[i]] for i in range(len(test_mora_index_lists))]
 
 
-def train(epoch):
-    model.train()
+def train(epoch, first=True):
+    if first:
+        model_vae.train()
+    else:
+        model_recon.train()
+
     train_loss = 0
     for batch_idx, data in enumerate(train_loader):
         tmp = []
@@ -348,14 +383,26 @@ def train(epoch):
             tmp.append(torch.from_numpy(data[j]).to(device))
 
 
-        optimizer.zero_grad()
-        lf0, mu, logvar, reconstrution = model(tmp[0], tmp[1], tmp[2])
+        
+        if first:
+            optimizer_vae.zero_grad()
+            lf0, mu, logvar = model_vae(tmp[0], tmp[1], tmp[2])
         #print(lf0.size())
         #print(tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim].size())
-        loss = loss_function(lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar) + F.mse_loss(reconstrution.view(-1,1), tmp[1].view(-1,1 ), reduction='sum')
+            loss = loss_function(model_vae, lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar)
+        else:
+            optimizer_recon.zero_grad()
+            lf0, mu, logvar, recon = model_recon(tmp[0], tmp[1], tmp[2])
+            loss = loss_function(recon, tmp[1], mu, logvar)
         loss.backward()
         train_loss += loss.item()
-        optimizer.step()
+
+        if first:
+            optimizer_vae.step()
+        else:
+            optimizer_recon.step()
+
+
         del tmp
         if batch_idx % 4500 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
@@ -370,7 +417,7 @@ def train(epoch):
     return train_loss / len(train_loader)
 
 
-def test(epoch):
+def test(epoch, first=True):
     model.eval()
     test_loss = 0
     with torch.no_grad():
@@ -381,9 +428,15 @@ def test(epoch):
             for j in range(3):
                 tmp.append(torch.tensor(data[j]).to(device))
 
-
-            lf0, mu, logvar, reconstrution = model(tmp[0], tmp[1], tmp[2])
-            loss = loss_function(lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar) + F.mse_loss(reconstrution.view(-1), tmp[1].view(-1, ), reduction='sum')
+            if first:
+                lf0, mu, logvar = model_vae(tmp[0], tmp[1], tmp[2])
+            #print(lf0.size())
+            #print(tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim].size())
+                loss = loss_function(lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar)
+            else:
+                lf0, mu, logvar, recon = model_recon(model_vae, tmp[0], tmp[1], tmp[2])
+                loss = loss_function(recon, tmp[1], mu, logvar)
+            
             test_loss += loss.item()
 
             del tmp
@@ -404,9 +457,15 @@ num_epochs = args.num_epoch
 
 #model.load_state_dict(torch.load('vae.pth'))
 
+optimizer_vae = optim.Adam(model_vae.parameters(), lr=2e-3)#1e-3
+optimizer_recon = optim.Adam(model_recon.parameters(), lr=2e-3)#1e-3
+
+#vae learning fisrt
+
 for epoch in range(1, num_epochs + 1):
     loss = train(epoch)
     test_loss = test(epoch)
+
     print(loss)
     print(test_loss)
 
@@ -431,3 +490,33 @@ for epoch in range(1, num_epochs + 1):
 np.save(args.output_dir +'/loss_list.npy', np.array(loss_list))
 np.save(args.output_dir +'/test_loss_list.npy', np.array(test_loss_list))
 torch.save(model.state_dict(), args.output_dir +'/model.pth')
+
+
+for epoch in range(1, num_epochs + 1):
+    loss = train(epoch, first=False)
+    test_loss = test(epoch, first=False)
+
+    print(loss)
+    print(test_loss)
+
+    print('epoch [{}/{}], loss: {:.4f} test_loss: {:.4f}'.format(
+        epoch + 1,
+        num_epochs,
+        loss,
+        test_loss))
+
+    # logging
+    loss_list.append(loss)
+    test_loss_list.append(test_loss)
+
+    print(time.time() - start)
+
+    if epoch % 5 == 0:
+        torch.save(model.state_dict(), args.output_dir + '/model_recon_'+str(epoch)+'.pth')
+    np.save(args.output_dir +'/loss_list_recon.npy', np.array(loss_list))
+    np.save(args.output_dir +'/test_loss_list_recon.npy', np.array(test_loss_list))
+
+# save the training model
+np.save(args.output_dir +'/loss_list_recon.npy', np.array(loss_list))
+np.save(args.output_dir +'/test_loss_list_recon.npy', np.array(test_loss_list))
+torch.save(model.state_dict(), args.output_dir +'/model_recon.pth')
