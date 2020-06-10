@@ -190,7 +190,7 @@ import torch.nn.functional as F
 
 
 z_dim = args.z_dim
-dropout= args.dporout_ratio
+dropout= args.dropout_ratio
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
