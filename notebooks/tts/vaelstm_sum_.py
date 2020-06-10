@@ -389,10 +389,10 @@ def train(epoch, first=True):
             lf0, mu, logvar = model_vae(tmp[0], tmp[1], tmp[2])
         #print(lf0.size())
         #print(tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim].size())
-            loss = loss_function(model_vae, lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar)
+            loss = loss_function(lf0, tmp[1][:, lf0_start_idx:lf0_start_idx+lf0_dim], mu, logvar)
         else:
             optimizer_recon.zero_grad()
-            lf0, mu, logvar, recon = model_recon(tmp[0], tmp[1], tmp[2])
+            lf0, mu, logvar, recon = model_recon(model_vae, tmp[0], tmp[1], tmp[2])
             loss = loss_function(recon, tmp[1], mu, logvar)
         loss.backward()
         train_loss += loss.item()
