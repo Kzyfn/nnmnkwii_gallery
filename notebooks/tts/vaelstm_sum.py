@@ -30,7 +30,13 @@ def parse():
         '--output_dir',
         type=str,
         required=True,
-    )
+    ),
+    parser.add_argument(
+        '-dr',
+        '--dropout_ratio',
+        type=float,
+        default=0.3,
+    ),
 
     return parser.parse_args()
 
