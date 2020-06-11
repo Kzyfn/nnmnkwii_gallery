@@ -408,7 +408,7 @@ def objective(trial):
             os.mkdir(args.output_dir)
 
         if epoch % 5 == 0:
-            torch.save(model.state_dict(),  '{}/{}layers_zdim{}_model_{}.pth'.format(args.output_dir, num_lstm_layers, z_dim epoch))
+            torch.save(model.state_dict(),  '{}/{}layers_zdim{}_model_{}.pth'.format(args.output_dir, num_lstm_layers, z_dim, epoch) )
         np.save(args.output_dir +'/{}layers_zdim{}_loss_list.npy'.format(num_lstm_layers, z_dim), np.array(loss_list))
         np.save(args.output_dir +'/{}layers_zdim{}_test_loss_list.npy'.format(num_lstm_layers, z_dim), np.array(test_loss_list))
 
