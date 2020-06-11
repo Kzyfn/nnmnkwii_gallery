@@ -385,7 +385,14 @@ def test(epoch):
 
 
 loss_list = []
+
+if os.path.isfile(args.output_dir +'/loss_list.npy'):
+    loss_list = np.load(args.output_dir +'/loss_list.npy')
+
 test_loss_list = []
+if os.path.isfile(args.output_dir +'/test_loss_list.npy'):
+    loss_list = np.load(args.output_dir +'/test_loss_list.npy')
+
 num_epochs = args.num_epoch
 
 #model.load_state_dict(torch.load('vae.pth'))
