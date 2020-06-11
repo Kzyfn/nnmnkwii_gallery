@@ -40,7 +40,7 @@ def parse():
         '-nt',
         '--num_trials',
         type=int,
-        require=True
+        required=True
     )
 
     return parser.parse_args()
