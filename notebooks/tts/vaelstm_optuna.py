@@ -404,8 +404,6 @@ def objective(trial):
 
         print(time.time() - start)
 
-        if not os.path.isdir(args.output_dir + '{}layers_zdim{}'.format()):
-            os.mkdir(args.output_dir)
 
         if epoch % 5 == 0:
             torch.save(model.state_dict(),  '{}/{}layers_zdim{}_model_{}.pth'.format(args.output_dir, num_lstm_layers, z_dim, epoch) )
