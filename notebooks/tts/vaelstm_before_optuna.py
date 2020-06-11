@@ -288,7 +288,7 @@ test_mora_index_lists = []
 
 
 
-for i, mora_i in enumerate(mora_index_lists_for_model[:train_ratio]):
+for i, mora_i in enumerate(mora_index_lists_for_model):
     if (i - 1) % 20 == 0:#test
         pass
     elif i % 20 == 0:#valid
