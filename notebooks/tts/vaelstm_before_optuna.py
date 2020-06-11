@@ -54,10 +54,6 @@ if not os.path.isdir(args.output_dir):
 
 
 import sys
-print(sys.path)
-#sys.path.remove('/usr/local/lib/python3.7/site-packages')
-sys.path.append('/usr/local/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
-sys.path.append('/Users/kazuya_yufune/.pyenv/versions/3.6.0/lib/python3.6/site-packages')
 
 import time
 
@@ -282,7 +278,11 @@ train_mora_index_lists = []
 test_mora_index_lists = []
 #train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
-for i, mora_i in enumerate(mora_index_lists_for_model):
+
+train_ratio = int(0.05*len(train_mora_index_lists))#1
+
+
+for i, mora_i in enumerate(mora_index_lists_for_model[:train_ratio]):
     if (i - 1) % 20 == 0:#test
         pass
     elif i % 20 == 0:#valid
@@ -350,7 +350,7 @@ def train(epoch):
         train_loss += loss.item()
         optimizer.step()
         del tmp
-        if batch_idx % 4945 == 0:
+        if batch_idx % len(train_loader) == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx, train_num,
                 100. * batch_idx / train_num,
