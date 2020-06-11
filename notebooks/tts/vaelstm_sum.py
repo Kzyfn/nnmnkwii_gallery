@@ -37,6 +37,12 @@ def parse():
         type=float,
         default=0.3,
     ),
+    parser.add_argument(
+        '-mp',
+        '--model_path',
+        type=str,
+        default='',
+    ),
 
     return parser.parse_args()
 
@@ -281,6 +287,10 @@ for i, mora_i in enumerate(mora_index_lists_for_model):
 
 
 model = VAE().to(device)
+
+if args.model_path != '':
+    model.load_state_dict(torch.load(args.model_path))
+
 optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
 
 start = time.time()
@@ -398,8 +408,13 @@ for epoch in range(1, num_epochs + 1):
 
     print(time.time() - start)
 
-    if epoch % 10 == 0:
-        torch.save(model.state_dict(), args.output_dir + '/model_'+str(epoch)+'.pth')
+    if args.model_path != '':
+        pre_trained_epoch = int(args.model_path[args.model_path.index('model_')+6:args.model_path.index('.pth')])
+    else:
+        pre_trained_epoch = 0
+
+    if epoch % 5 == 0:
+        torch.save(model.state_dict(), args.output_dir + '/model_'+str(epoch+pre_trained_epoch)+'.pth')
     np.save(args.output_dir +'/loss_list.npy', np.array(loss_list))
     np.save(args.output_dir +'/test_loss_list.npy', np.array(test_loss_list))
 
