@@ -283,7 +283,7 @@ def objective(trial):
 
 
     num_lstm_layers = trial.suggest_int('num_lstm_layers', 1, 4)
-    z_dim = trial.suggest_categorical('num_lstm_layers', [1, 2, 4, 8, 16, 32])
+    z_dim = trial.suggest_categorical('z_dim', [1, 2, 4, 8, 16, 32])
 
     model = VAE(num_lstm_layers, z_dim).to(device)
 
