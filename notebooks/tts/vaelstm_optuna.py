@@ -194,7 +194,7 @@ class VAE(nn.Module):
         super(VAE, self).__init__()
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
-
+        self.z_dim = z_dim
         self.fc11 = nn.Linear(acoustic_linguisic_dim+acoustic_dim, acoustic_linguisic_dim+acoustic_dim)
 
         self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
@@ -227,7 +227,7 @@ class VAE(nn.Module):
 
     def decode(self, z, linguistic_features, mora_index):
         
-        z_tmp = torch.tensor([[0]*z_dim]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to(device)
+        z_tmp = torch.tensor([[0]*self.z_dim]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to(device)
         count = 0
         prev_index = 0
         for i, mora_i in enumerate(mora_index):
