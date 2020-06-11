@@ -237,7 +237,7 @@ class VAE(nn.Module):
                 count += 1       
 
         
-        x = torch.cat([linguistic_features, z_tmp.view(-1, z_dim)], dim=1)
+        x = torch.cat([linguistic_features, z_tmp.view(-1, self.z_dim)], dim=1)
         x = self.fc12(x)
         x = F.relu(x)
 
