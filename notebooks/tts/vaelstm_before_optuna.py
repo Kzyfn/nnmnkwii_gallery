@@ -43,6 +43,12 @@ def parse():
         type=str,
         default='',
     ),
+    parser.add_argument(
+        '-tr',
+        '--train_ratio',
+        type=float,
+        default=1.0
+    )
 
     return parser.parse_args()
 
@@ -279,7 +285,7 @@ test_mora_index_lists = []
 #train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
 
-train_ratio = int(0.05*len(4500))#1
+train_ratio = int(args.train_ratio*4500)#1
 
 
 for i, mora_i in enumerate(mora_index_lists_for_model[:train_ratio]):
