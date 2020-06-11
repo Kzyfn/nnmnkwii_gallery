@@ -116,6 +116,14 @@ use_phone_alignment = True
 acoustic_subphone_features = "coarse_coding" if use_phone_alignment else "full" #とは？
 
 
+def rmse(a, b):
+    return np.sqrt(np.mean((a - b) ** 2))
+ 
+def calc_lf0_rmse(natural, generated, lf0_idx, vuv_idx):
+    idx = (natural[:, vuv_idx] * (generated[:, vuv_idx] >= 0.5)).astype(bool)
+    return rmse(natural[idx, lf0_idx], generated[idx, lf0_idx]) * 1200 / np.log(2)  # unit: [cent]
+
+
 
 class BinaryFileSource(FileDataSource):
     def __init__(self, data_root, dim, train):
@@ -365,6 +373,7 @@ def objective(trial):
     def test(epoch):
         model.eval()
         test_loss = 0
+        f0_loss = 0
         with torch.no_grad():
             for i, data, in enumerate(test_loader):
                 tmp = []
@@ -374,15 +383,15 @@ def objective(trial):
                     tmp.append(torch.tensor(data[j]).to(device))
 
 
-                recon_batch, mu, logvar = model(tmp[0], tmp[1], tmp[2])
-                test_loss += loss_function(recon_batch, tmp[1], mu, logvar).item()
-
+                recon_batch, z, z_unquantized = model(tmp[0], tmp[1], tmp[2])
+                test_loss += loss_function(recon_batch, tmp[1],  z, z_unquantized).item()
+                f0_loss += calc_lf0_rmse(recon_batch.numpy(), tmp[1].numpy(), lf0_start_idx, vuv_start_idx)
                 del tmp
 
         test_loss /= len(test_loader)
         print('====> Test set loss: {:.4f}'.format(test_loss))
         
-        return test_loss
+        return test_loss, f0_loss
 
 
 
@@ -396,7 +405,7 @@ def objective(trial):
 
     for epoch in range(1, num_epochs + 1):
         loss = train(epoch)
-        test_loss = test(epoch)
+        test_loss, f0_loss = test(epoch)
 
         print('epoch [{}/{}], loss: {:.4f} test_loss: {:.4f}'.format(
             epoch + 1,
@@ -416,7 +425,7 @@ def objective(trial):
         np.save(args.output_dir +'/{}layers_zdim{}_loss_list.npy'.format(num_lstm_layers, z_dim), np.array(loss_list))
         np.save(args.output_dir +'/{}layers_zdim{}_test_loss_list.npy'.format(num_lstm_layers, z_dim), np.array(test_loss_list))
 
-    return test_loss
+    return f0_loss
 
 
 study = optuna.create_study()
