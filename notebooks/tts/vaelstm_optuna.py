@@ -35,6 +35,12 @@ def parse():
         '--train_ratio',
         type=float,
         default=1.0
+    ),
+    parser.add_argument(
+        '-nt',
+        '--num_trials',
+        type=int,
+        require=True
     )
 
     return parser.parse_args()
@@ -414,4 +420,4 @@ def objective(trial):
 
 
 study = optuna.create_study()
-study.optimize(objective, n_trials = 1)
+study.optimize(objective, n_trials = args.num_trials)
