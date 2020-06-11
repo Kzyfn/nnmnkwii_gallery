@@ -285,7 +285,7 @@ test_mora_index_lists = []
 #train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
 
 
-train_ratio = int(args.train_ratio*4500)#1
+
 
 
 for i, mora_i in enumerate(mora_index_lists_for_model[:train_ratio]):
@@ -324,9 +324,12 @@ def loss_function(recon_x, x, mu, logvar):
 
 func_tensor = np.vectorize(torch.from_numpy)
 
-X_acoustic_train = [X['acoustic']['train'][i] for i in range(len(X['acoustic']['train']))] 
-Y_acoustic_train = [Y['acoustic']['train'][i] for i in range(len(Y['acoustic']['train']))]
-train_mora_index_lists = [train_mora_index_lists[i] for i in range(len(train_mora_index_lists))]
+
+train_ratio = int(args.train_ratio*len(train_mora_index_lists))#1
+
+X_acoustic_train = [X['acoustic']['train'][i] for i in range(len(X['acoustic']['train']))][:train_ratio]
+Y_acoustic_train = [Y['acoustic']['train'][i] for i in range(len(Y['acoustic']['train']))][:train_ratio]
+train_mora_index_lists = [train_mora_index_lists[i] for i in range(len(train_mora_index_lists))][:train_ratio]
 
 train_num = len(X_acoustic_train)
 
