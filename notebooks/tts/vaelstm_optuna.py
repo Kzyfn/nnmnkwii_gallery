@@ -3,7 +3,7 @@
 from os.path import expanduser, join
 import os
 import argparse
-
+import optuna
 def parse():
     parser = argparse.ArgumentParser(description='LSTM VAE', )
     parser.add_argument(
