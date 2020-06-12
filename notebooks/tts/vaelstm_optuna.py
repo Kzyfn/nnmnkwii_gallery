@@ -343,7 +343,7 @@ def objective(trial):
 
             
             for j in range(2):
-                tmp.append(torch.from_numpy(data[j]).to(device), dtype=)
+                tmp.append(torch.from_numpy(data[j]).to(device))
 
 
             optimizer.zero_grad()
