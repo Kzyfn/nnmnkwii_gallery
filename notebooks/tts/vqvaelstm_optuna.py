@@ -320,7 +320,8 @@ def objective(trial):
     start = time.time()
 
     # Reconstruction + KL divergence losses summed over all elements and batch
-    def loss_function(recon_x, x, z, z_unquantized):
+    def loss_function(recon_x, x, z, z_unquantized, beta=1):
+
         MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
 
         vq_loss = F.mse_loss(z.view(-1), z_unquantized.detach().view(-1, ), reduction='sum') + beta * F.mse_loss(z.detach().view(-1), z_unquantized.view(-1, ), reduction='sum')
