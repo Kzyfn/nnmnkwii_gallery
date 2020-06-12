@@ -242,6 +242,8 @@ class VAE(nn.Module):
         z_tmp = torch.tensor([[0]*self.z_dim]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to(device)
         
         for i, mora_i in enumerate(mora_index):
+            print(i)
+            print(mora_i)
             prev_index = 0 if i == 0 else mora_index[i-1]
             z_tmp[prev_index:mora_i] = z[i]
      
