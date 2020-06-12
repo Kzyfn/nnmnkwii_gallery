@@ -215,8 +215,10 @@ class VQVAE(nn.Module):
         self.num_layers = num_layers
         self.num_direction =  2 if bidirectional else 1
         self.quantized_vectors = nn.Embedding(num_class, z_dim)#torch.tensor([[i]*z_dim for i in range(nc)], requires_grad=True)
+        self.quantized_vectors.weight.data.uniform_(0, 1)
+
         self.z_dim = z_dim
-        #self.quantized_vectors.weight.data.uniform_(-1/num_class, 1/num_class)
+        
 
         self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
         self.fc2 = nn.Linear(self.num_direction*400, z_dim)
@@ -234,13 +236,11 @@ class VQVAE(nn.Module):
         return self.quantized_vectors.weight[min_index]
 
     def quantize_z(self, z_unquantized):
-        print(z_unquantized[0].size())
         z = torch.zeros(z_unquantized[0].size(), requires_grad=True)
 
         for i in range(z_unquantized[0].size()[0]):
             z[i] = self.choose_quantized_vector(z_unquantized[0][i].reshape(-1))
 
-        print(z)
         return z
 
     def encode(self, linguistic_f, acoustic_f, mora_index):
@@ -267,7 +267,7 @@ class VQVAE(nn.Module):
                 prev_index = i
                 count += 1
         
-        x = torch.cat([linguistic_features, z_tmp.view(-1, z_dim)], dim=1).view(linguistic_features.size()[0], 1, -1)
+        x = torch.cat([linguistic_features, z_tmp.view(-1, self.z_dim)], dim=1).view(linguistic_features.size()[0], 1, -1)
         
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
