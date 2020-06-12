@@ -276,7 +276,7 @@ def objective(trial):
     mora_index_lists = sorted(glob(join('data/basic5000/mora_index/squeezed_', "*.csv")))
     #mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
     mora_index_lists_for_model = [np.loadtxt(path).reshape(-1) for path in mora_index_lists]
-
+    print(mora_index_lists[0])
     train_mora_index_lists = []
     test_mora_index_lists = []
     #train_files, test_files = train_test_split(files, test_size=test_size, random_state=random_state)
