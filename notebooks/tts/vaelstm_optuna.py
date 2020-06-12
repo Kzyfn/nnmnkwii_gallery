@@ -402,7 +402,7 @@ def objective(trial):
 
     num_epochs = args.num_epoch
 
-
+    print('z_dim: {}, num_layers: {}'.format(z_dim, num_lstm_layers))
     for epoch in range(1, num_epochs + 1):
         loss = train(epoch)
         test_loss, f0_loss = test(epoch)
