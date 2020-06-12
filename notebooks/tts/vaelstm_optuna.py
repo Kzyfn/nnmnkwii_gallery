@@ -385,7 +385,7 @@ def objective(trial):
 
                 recon_batch, z, z_unquantized = model(tmp[0], tmp[1], tmp[2])
                 test_loss += loss_function(recon_batch, tmp[1],  z, z_unquantized).item()
-                f0_loss += calc_lf0_rmse(recon_batch.cpu().numpy(), tmp[1].cpu().numpy(), lf0_start_idx, vuv_start_idx)
+                f0_loss += calc_lf0_rmse(recon_batch.cpu().numpy().reshape(-1, 199), tmp[1].cpu().numpy().reshape(-1, 199), lf0_start_idx, vuv_start_idx)
                 del tmp
 
         test_loss /= len(test_loader)
