@@ -218,7 +218,6 @@ class VQVAE(nn.Module):
         self.quantized_vectors.weight.data.uniform_(0, 1)
 
         self.z_dim = z_dim
-        
 
         self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
         self.fc2 = nn.Linear(self.num_direction*400, z_dim)
@@ -278,6 +277,8 @@ class VQVAE(nn.Module):
         z_not_quantized = self.encode(linguistic_features, acoustic_features, mora_index)
         z = self.quantize_z(z_not_quantized)
         
+        print(Z)
+        print(z_not_quantized[0])
         return self.decode(z, linguistic_features, mora_index), z, z_not_quantized[0]
 
 
@@ -324,11 +325,7 @@ def objective(trial):
     def loss_function(recon_x, x, z, z_unquantized):
         MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
 
-        with torch.no_grad():
-            z_unquantized_no_grad = z_unquantized
-            z_no_grad = z
-
-        vq_loss = F.mse_loss(z.view(-1), z_unquantized.view(-1, ), reduction='sum') + beta * F.mse_loss(z.view(-1), z_unquantized.view(-1, ), reduction='sum')
+        vq_loss = F.mse_loss(z.view(-1), z_unquantized.detach().view(-1, ), reduction='sum') + beta * F.mse_loss(z.detach().view(-1), z_unquantized.view(-1, ), reduction='sum')
         #print(KLD)
         return MSE +  vq_loss
 
@@ -365,7 +362,7 @@ def objective(trial):
 
             optimizer.zero_grad()
             recon_batch, z, z_unquantized = model(tmp[0], tmp[1], tmp[2])
-            loss = loss_function(recon_batch, tmp[1],  z, z_unquantized )
+            loss = loss_function(recon_batch, tmp[1], z, z_unquantized)
             loss.backward()
             train_loss += loss.item()
             optimizer.step()
