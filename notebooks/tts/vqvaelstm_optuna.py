@@ -304,7 +304,7 @@ def objective(trial):
     z_dim = trial.suggest_categorical('z_dim', [1, 2, 4, 8, 16, 32])
     num_class = trial.suggest_int('num_class', 2, 4)
 
-    model = VQVAE(num_class=num_class, num_lstm_layers=num_lstm_layers, z_dim=z_dim).to(device)
+    model = VQVAE(num_class=num_class, num_layers=num_lstm_layers, z_dim=z_dim).to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=2e-3)#1e-3
 
