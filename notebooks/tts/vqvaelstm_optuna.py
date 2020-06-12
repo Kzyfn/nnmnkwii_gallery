@@ -328,7 +328,7 @@ def objective(trial):
             z_unquantized_no_grad = z_unquantized
             z_no_grad = z
 
-        vq_loss = F.mse_loss(z.view(-1), z_unquantized_no_grad.view(-1, ), reduction='sum') + beta * F.mse_loss(z_no_grad.view(-1), z_unquantized.view(-1, ), reduction='sum')
+        vq_loss = F.mse_loss(z.view(-1), z_unquantized_no_grad.to(device).view(-1, ), reduction='sum') + beta * F.mse_loss(z_no_grad.to(device).view(-1), z_unquantized.view(-1, ), reduction='sum')
         #print(KLD)
         return MSE +  vq_loss
 
