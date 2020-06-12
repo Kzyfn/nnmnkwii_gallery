@@ -402,9 +402,17 @@ def objective(trial):
 
     num_epochs = args.num_epoch
 
+
     for epoch in range(1, num_epochs + 1):
         loss = train(epoch)
         test_loss, f0_loss = test(epoch)
+
+        if epoch == 1:
+            min_f0_loss = f0_loss
+            min_f0_epoch = epoch
+        elif f0_loss < min_f0_loss:
+            min_f0_loss = f0_loss
+            min_f0_epoch = epoch
 
         print('epoch [{}/{}], loss: {:.4f} test_loss: {:.4f}'.format(
             epoch + 1,
@@ -425,6 +433,10 @@ def objective(trial):
         np.save(args.output_dir +'/{}layers_zdim{}_loss_list.npy'.format(num_lstm_layers, z_dim), np.array(loss_list))
         np.save(args.output_dir +'/{}layers_zdim{}_test_loss_list.npy'.format(num_lstm_layers, z_dim), np.array(test_loss_list))
         np.save(args.output_dir +'/{}layers_zdim{}_test_f0_loss_list.npy'.format(num_lstm_layers, z_dim), np.array(test_f0_erros))
+
+        if epoch > min_f0_epoch + 4:
+            torch.save(model.state_dict(),  '{}/{}layers_zdim{}_model_{}.pth'.format(args.output_dir, num_lstm_layers, z_dim, epoch))
+            break
 
     return f0_loss
 
