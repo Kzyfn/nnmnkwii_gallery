@@ -326,7 +326,7 @@ def objective(trial):
 
 
 
-        vq_loss = F.mse_loss(z.view(-1), z_unquantized.detach().view(-1, ), reduction='sum') + beta * F.mse_loss(z.detach().view(-1), z_unquantized.view(-1, ), reduction='sum')
+        vq_loss = F.mse_loss(z.view(-1), z_unquantized.detach().to(device).view(-1, ), reduction='sum') + beta * F.mse_loss(z.detach().to(device).view(-1), z_unquantized.view(-1, ), reduction='sum')
         #print(KLD)
         return MSE +  vq_loss
 
