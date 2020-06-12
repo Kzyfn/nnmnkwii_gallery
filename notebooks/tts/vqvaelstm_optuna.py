@@ -233,6 +233,7 @@ class VQVAE(nn.Module):
         return self.quantized_vectors.weight[min_index]
 
     def quantize_z(self, z_unquantized):
+        print(z_unquantized)
         z = torch.zeros(z_unquantized.size(), requires_grad=True)
 
         for i in range(z_unquantized.size()[0]):
