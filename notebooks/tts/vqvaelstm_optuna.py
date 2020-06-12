@@ -302,7 +302,7 @@ def objective(trial):
 
     num_lstm_layers = trial.suggest_int('num_lstm_layers', 1, 4)
     z_dim = trial.suggest_categorical('z_dim', [1, 2, 4, 8, 16, 32])
-    num_class = trial.suggest_int('num_lstm_layers', 2, 4)
+    num_class = trial.suggest_int('num_class', 2, 4)
 
     model = VQVAE(num_class=num_class, num_lstm_layers=num_lstm_layers, z_dim=z_dim).to(device)
 
