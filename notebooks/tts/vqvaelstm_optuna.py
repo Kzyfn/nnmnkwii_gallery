@@ -234,12 +234,10 @@ class VQVAE(nn.Module):
         return self.quantized_vectors.weight[min_index]
 
     def quantize_z(self, z_unquantized):
-        print(self.z_dim)
-        print(z_unquantized)
-        z = torch.zeros(z_unquantized.size(), requires_grad=True)
+        z = torch.zeros(z_unquantized[0].size(), requires_grad=True)
 
-        for i in range(z_unquantized.size()[0]):
-            z[i] = self.choose_quantized_vector(z_unquantized[i])
+        for i in range(z_unquantized[0].size()[0]):
+            z[i] = self.choose_quantized_vector(z_unquantized[0][i].reshape(-1))
 
         return z
 
