@@ -226,9 +226,7 @@ class VAE(nn.Module):
         x = F.relu(x)
 
         out, hc = self.lstm1(x.view( x.size()[0],1, -1))
-        nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
-        out = out[nonzero_indices]
-        del nonzero_indices
+        out = out[mora_index]
         
         h1 = F.relu(out)
 
@@ -242,13 +240,11 @@ class VAE(nn.Module):
     def decode(self, z, linguistic_features, mora_index):
         
         z_tmp = torch.tensor([[0]*self.z_dim]*linguistic_features.size()[0], dtype=torch.float32, requires_grad=True).to(device)
-        count = 0
-        prev_index = 0
+        
         for i, mora_i in enumerate(mora_index):
-            if mora_i == 1:
-                z_tmp[prev_index:i] = z[count]
-                prev_index = i
-                count += 1       
+            prev_index = 0 if i == 0 else mora_index[i-1]
+            z_tmp[prev_index:mora_i] = z[i]
+     
 
         
         x = torch.cat([linguistic_features, z_tmp.view(-1, self.z_dim)], dim=1)
@@ -277,9 +273,9 @@ class VAE(nn.Module):
 import pandas as pd
 
 def objective(trial):
-    mora_index_lists = sorted(glob(join('data/basic5000/mora_index', "*.csv")))
+    mora_index_lists = sorted(glob(join('data/basic5000/squeezed_mora_index', "*.csv")))
     #mora_index_lists = mora_index_lists[:len(mora_index_lists)-5] # last 5 is real testset
-    mora_index_lists_for_model = [np.array(pd.read_csv(path)).reshape(-1) for path in mora_index_lists]
+    mora_index_lists_for_model = [np.loadtxt(path).reshape(-1) for path in mora_index_lists]
 
     train_mora_index_lists = []
     test_mora_index_lists = []
@@ -356,7 +352,9 @@ def objective(trial):
             loss.backward()
             train_loss += loss.item()
             optimizer.step()
-            del tmp
+
+            #del tmp
+
             if batch_idx % len(train_loader) == 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx, train_num,
@@ -386,7 +384,7 @@ def objective(trial):
                 recon_batch, z, z_unquantized = model(tmp[0], tmp[1], tmp[2])
                 test_loss += loss_function(recon_batch, tmp[1],  z, z_unquantized).item()
                 f0_loss += calc_lf0_rmse(recon_batch.cpu().numpy().reshape(-1, 199), tmp[1].cpu().numpy().reshape(-1, 199), lf0_start_idx, vuv_start_idx)
-                del tmp
+                #del tmp
 
         test_loss /= len(test_loader)
         print('====> Test set loss: {:.4f}'.format(test_loss))
@@ -414,7 +412,7 @@ def objective(trial):
             loss,
             test_loss))
 
-        # logging
+        #logging
         loss_list.append(loss)
         test_loss_list.append(test_loss)
         test_f0_erros.append(f0_loss)
