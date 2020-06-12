@@ -245,7 +245,7 @@ class VAE(nn.Module):
             print(i)
             print(mora_i)
             prev_index = 0 if i == 0 else mora_index[i-1]
-            z_tmp[prev_index:mora_i] = z[i]
+            z_tmp[prev_index:int(mora_i)] = z[i]
      
 
         
