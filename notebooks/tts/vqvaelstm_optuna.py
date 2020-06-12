@@ -219,8 +219,11 @@ class VQVAE(nn.Module):
 
         self.z_dim = z_dim
 
+        self.fc11 = nn.Linear(acoustic_linguisic_dim+acoustic_dim, acoustic_linguisic_dim+acoustic_dim)
+
         self.lstm1 = nn.LSTM(acoustic_linguisic_dim+acoustic_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)#入力サイズはここできまる
         self.fc2 = nn.Linear(self.num_direction*400, z_dim)
+        self.fc12 = nn.Linear(acoustic_linguisic_dim+z_dim, acoustic_linguisic_dim+z_dim)
         ##ここまでエンコーダ
         
         self.lstm2 = nn.LSTM(acoustic_linguisic_dim+z_dim, 400, num_layers, bidirectional=bidirectional, dropout=dropout)
@@ -244,6 +247,8 @@ class VQVAE(nn.Module):
 
     def encode(self, linguistic_f, acoustic_f, mora_index):
         x = torch.cat([linguistic_f, acoustic_f], dim=1)
+        x = self.fc11(x)
+        x = F.relu(x)
         out, hc = self.lstm1(x.view( x.size()[0],1, -1))
         nonzero_indices = torch.nonzero(mora_index.view(-1).data).squeeze()
         out = out[nonzero_indices]
@@ -267,6 +272,9 @@ class VQVAE(nn.Module):
                 count += 1
         
         x = torch.cat([linguistic_features, z_tmp.view(-1, self.z_dim)], dim=1).view(linguistic_features.size()[0], 1, -1)
+        
+        x = self.fc12(x)
+        x = F.relu(x)
         
         h3, (h, c) = self.lstm2(x)
         h3 = F.relu(h3)
