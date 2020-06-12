@@ -324,9 +324,11 @@ def objective(trial):
     def loss_function(recon_x, x, z, z_unquantized):
         MSE = F.mse_loss(recon_x.view(-1), x.view(-1, ), reduction='sum')#F.binary_cross_entropy(recon_x.view(-1), x.view(-1, ), reduction='sum')
 
+        with torch.no_grad():
+            z_unquantized_no_grad = z_unquantized
+            z_no_grad = z
 
-
-        vq_loss = F.mse_loss(z.view(-1), z_unquantized.detach().to(device).view(-1, ), reduction='sum') + beta * F.mse_loss(z.detach().to(device).view(-1), z_unquantized.view(-1, ), reduction='sum')
+        vq_loss = F.mse_loss(z.view(-1), z_unquantized_no_grad.view(-1, ), reduction='sum') + beta * F.mse_loss(z_no_grad.view(-1), z_unquantized.view(-1, ), reduction='sum')
         #print(KLD)
         return MSE +  vq_loss
 
