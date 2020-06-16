@@ -1,0 +1,12 @@
+min_error: 316.60331212073453,	 min_epoch: 3,	 path: 1layers_zdim16_test_f0_loss_list.npy
+min_error: 304.8317094508624,	 min_epoch: 6,	 path: 1layers_zdim1_test_f0_loss_list.npy
+min_error: 305.3576390357311,	 min_epoch: 14,	 path: 1layers_zdim2_test_f0_loss_list.npy
+min_error: 313.95208699503945,	 min_epoch: 15,	 path: 1layers_zdim4_test_f0_loss_list.npy
+min_error: 286.30127817064636,	 min_epoch: 3,	 path: 2layers_zdim1_test_f0_loss_list.npy
+min_error: 296.49309897897166,	 min_epoch: 18,	 path: 2layers_zdim2_test_f0_loss_list.npy
+min_error: 319.769656019064,	 min_epoch: 5,	 path: 2layers_zdim8_test_f0_loss_list.npy
+min_error: 328.408255244114,	 min_epoch: 10,	 path: 3layers_zdim32_test_f0_loss_list.npy
+min_error: 331.0948369931303,	 min_epoch: 7,	 path: 3layers_zdim4_test_f0_loss_list.npy
+min_error: 328.45334837284275,	 min_epoch: 13,	 path: 3layers_zdim8_test_f0_loss_list.npy
+min_error: 323.4191121683566,	 min_epoch: 12,	 path: 4layers_zdim16_test_f0_loss_list.npy
+min_error: 332.43672098076104,	 min_epoch: 10,	 path: 4layers_zdim32_test_f0_loss_list.npy
